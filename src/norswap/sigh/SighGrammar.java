@@ -140,17 +140,8 @@ public class SighGrammar extends Grammar
         .suffix(function_args,
             $ -> new FunCallNode($.span(), $.$[0], $.$[1]));
 
-
-    /* VIBE */
-    public rule channel_expr =
-        right_expression()
-            .operand(suffix_expression)
-            .prefix(ARROW.as_val(ChannelOperator.IO),
-                $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
-
-
     public rule prefix_expression = right_expression()
-        .operand(channel_expr)
+        .operand(suffix_expression)
         .prefix(BANG.as_val(NOT),
             $ -> new UnaryExpressionNode($.span(), $.$[0], $.$[1]));
 
@@ -201,13 +192,27 @@ public class SighGrammar extends Grammar
         .infix(EQUALS,
             $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
 
-    public rule expression = seq(assignment_expression);
-
 
     /* VIBE */
+    public rule channel_expr =
+        right_expression()
+            .operand(suffix_expression)
+            .prefix(ARROW.as_val(ChannelOperator.IO),
+                $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
+
     public rule channel_value = lazy(() -> choice(string, integer, floating));
 
     public rule channel_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelStatementNode($.span(), $.$[0])); //todo change channel statement semantic analysis
+
+    public rule channel_assignment_expression = right_expression()
+        .operand(channel_expr)
+        .infix(EQUALS,
+            $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
+
+    public rule expression = lazy(() -> choice(seq(assignment_expression), channel_assignment_expression));
+
+
+
 
     public rule expression_stmt =
         expression

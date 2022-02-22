@@ -125,6 +125,9 @@ public final class SemanticAnalysis
         walker.register(AssignmentNode.class,           PRE_VISIT,  analysis::assignment);
 
         /* VIBE */
+        /*walker.register(ChannelIntLiteralNode.class,           PRE_VISIT,  analysis::intLiteral);
+        walker.register(ChannelFloatLiteralNode.class,         PRE_VISIT,  analysis::floatLiteral);
+        walker.register(ChannelStringLiteralNode.class,        PRE_VISIT,  analysis::stringLiteral);*/
         walker.register(ChannelExpressionNode.class,     PRE_VISIT,  analysis::channelExpression);
 
         // types
