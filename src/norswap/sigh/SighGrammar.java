@@ -52,6 +52,9 @@ public class SighGrammar extends Grammar
     public rule DOLLAR          = word("$");
     public rule COMMA           = word(",");
 
+    /* VIBE */
+    public rule ARROW = word("<-");
+
     public rule _var            = reserved("var");
     public rule _fun            = reserved("fun");
     public rule _struct         = reserved("struct");
@@ -137,8 +140,17 @@ public class SighGrammar extends Grammar
         .suffix(function_args,
             $ -> new FunCallNode($.span(), $.$[0], $.$[1]));
 
+
+    /* VIBE */
+    public rule channel_expr =
+        right_expression()
+            .operand(suffix_expression)
+            .prefix(ARROW.as_val(ChannelOperator.IO),
+                $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
+
+
     public rule prefix_expression = right_expression()
-        .operand(suffix_expression)
+        .operand(channel_expr)
         .prefix(BANG.as_val(NOT),
             $ -> new UnaryExpressionNode($.span(), $.$[0], $.$[1]));
 
@@ -185,12 +197,17 @@ public class SighGrammar extends Grammar
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
     public rule assignment_expression = right_expression()
-        .operand(or_expression)
+        .operand(or_expression) //or_expression
         .infix(EQUALS,
             $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
 
-    public rule expression =
-        seq(assignment_expression);
+    public rule expression = seq(assignment_expression);
+
+
+    /* VIBE */
+    public rule channel_value = lazy(() -> choice(string, integer, floating));
+
+    public rule channel_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelStatementNode($.span(), $.$[0])); //todo change channel statement semantic analysis
 
     public rule expression_stmt =
         expression
@@ -217,6 +234,7 @@ public class SighGrammar extends Grammar
         this.if_stmt,
         this.while_stmt,
         this.return_stmt,
+        this.channel_stmt, // Vibe
         this.expression_stmt));
 
     public rule statements =

@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
+import static norswap.sigh.ast.ChannelOperator.IO;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
@@ -123,6 +124,9 @@ public final class SemanticAnalysis
         walker.register(BinaryExpressionNode.class,     PRE_VISIT,  analysis::binaryExpression);
         walker.register(AssignmentNode.class,           PRE_VISIT,  analysis::assignment);
 
+        /* VIBE */
+        walker.register(ChannelExpressionNode.class,     PRE_VISIT,  analysis::channelExpression);
+
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
         walker.register(ArrayTypeNode.class,            PRE_VISIT,  analysis::arrayType);
@@ -145,6 +149,9 @@ public final class SemanticAnalysis
         walker.register(IfNode.class,                   PRE_VISIT,  analysis::ifStmt);
         walker.register(WhileNode.class,                PRE_VISIT,  analysis::whileStmt);
         walker.register(ReturnNode.class,               PRE_VISIT,  analysis::returnStmt);
+
+        /* VIBE */
+        walker.register(ChannelStatementNode.class,     PRE_VISIT,  node -> {});
 
         walker.registerFallback(POST_VISIT, node -> {});
 
@@ -478,6 +485,23 @@ public final class SemanticAnalysis
             else if (isEquality(node.operator))
                 binaryEquality(r, node, left, right);
         });
+    }
+
+    /* VIBE */
+    // =============================================================================================
+
+    private void channelExpression (ChannelExpressionNode node)
+    {
+        assert node.operator == ChannelOperator.IO; // only one for now
+        R.set(node, "type", BoolType.INSTANCE);
+
+        R.rule()
+            .using(node.operand, "type")
+            .by(r -> {
+                Type opType = r.get(0);
+                if (!(opType instanceof BoolType))
+                    r.error("Trying to negate type: " + opType, node);
+            });
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -881,6 +905,7 @@ public final class SemanticAnalysis
                 }
             });
     }
+
 
     // ---------------------------------------------------------------------------------------------
 
