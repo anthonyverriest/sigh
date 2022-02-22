@@ -194,9 +194,12 @@ public class SighGrammar extends Grammar
 
 
     /* VIBE */
+    public rule channel = left_expression()
+        .left(reference);
+
     public rule channel_expr =
         right_expression()
-            .operand(suffix_expression)
+            .operand(channel)
             .prefix(ARROW.as_val(ChannelOperator.IO),
                 $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
 

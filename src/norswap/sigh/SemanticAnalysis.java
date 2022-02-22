@@ -496,7 +496,6 @@ public final class SemanticAnalysis
     private void channelExpression (ChannelExpressionNode node)
     {
         assert node.operator == ChannelOperator.IO; // only one for now
-        R.set(node, "type", BoolType.INSTANCE);
 
         R.rule()
             .using(node.operand, "type")
