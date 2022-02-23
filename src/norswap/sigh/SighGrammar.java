@@ -203,14 +203,30 @@ public class SighGrammar extends Grammar
             .prefix(ARROW.as_val(ChannelOperator.IO),
                 $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
 
-    public rule channel_value = lazy(() -> choice(string, integer, floating));
-
-    public rule channel_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelStatementNode($.span(), $.$[0])); //todo change channel statement semantic analysis
 
     public rule channel_assignment_expression = right_expression()
         .operand(channel_expr)
         .infix(EQUALS,
             $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
+
+
+    public rule channel_value =  choice(string, integer, floating);
+
+    public rule channel_expression =  left_expression()
+        .right(channel_value)
+        .left(reference)
+        .infix(ARROW,
+            $ -> new AssignmentNode($.span(), $.$[0], $.$[1])); //todo change node :: channel statement
+
+    public rule channel_stmt =
+        channel_expression
+            .filter($ -> {
+                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode))
+                    return false;
+                $.push(new ExpressionStatementNode($.span(), $.$[0]));
+                return true;
+            });
+
 
     public rule expression = lazy(() -> choice(seq(assignment_expression), channel_assignment_expression));
 
