@@ -194,6 +194,12 @@ public class SighGrammar extends Grammar
 
 
     /* VIBE */
+    public rule chan =
+        number
+            .push($ -> new ChanIntLiteralNode($.span(), $.$[0]))
+            .word(); //TODO
+
+
     public rule channel = left_expression()
         .left(reference);
 
@@ -216,12 +222,12 @@ public class SighGrammar extends Grammar
         .right(channel_value)
         .left(reference)
         .infix(ARROW,
-            $ -> new AssignmentNode($.span(), $.$[0], $.$[1])); //todo change node :: channel statement
+            $ -> new ChannelAssignmentNode($.span(), $.$[0], $.$[1])); //todo change node :: channel statement
 
     public rule channel_stmt =
         channel_expression
             .filter($ -> {
-                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode))
+                if (!($.$[0] instanceof ChannelAssignmentNode || $.$[0] instanceof FunCallNode))
                     return false;
                 $.push(new ExpressionStatementNode($.span(), $.$[0]));
                 return true;

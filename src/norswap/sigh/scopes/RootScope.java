@@ -30,6 +30,11 @@ public final class RootScope extends Scope
     public final SyntheticDeclarationNode Void   = decl("Void",   TYPE);
     public final SyntheticDeclarationNode Type   = decl("Type",   TYPE);
 
+    /* VIBE */
+    public final SyntheticDeclarationNode ChanInt   = decl("ChanInt",   TYPE);
+    public final SyntheticDeclarationNode ChanFloat   = decl("ChanFloat",   TYPE);
+    public final SyntheticDeclarationNode ChanString   = decl("ChanString",   TYPE);
+
     // root scope variables
     public final SyntheticDeclarationNode _true  = decl("true",  VARIABLE);
     public final SyntheticDeclarationNode _false = decl("false", VARIABLE);
@@ -37,6 +42,10 @@ public final class RootScope extends Scope
 
     // root scope functions
     public final SyntheticDeclarationNode print = decl("print", FUNCTION);
+
+    /* VIBE */
+    public final SyntheticDeclarationNode make = decl("make", FUNCTION);
+    public final SyntheticDeclarationNode close = decl("close", FUNCTION);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -50,6 +59,11 @@ public final class RootScope extends Scope
         reactor.set(Void,   "type",       TypeType.INSTANCE);
         reactor.set(Type,   "type",       TypeType.INSTANCE);
 
+        /* VIBE */
+        reactor.set(ChanInt,   "type",       ChanType.INSTANCE);
+        reactor.set(ChanString,   "type",       ChanType.INSTANCE);
+        reactor.set(ChanFloat,   "type",       ChanType.INSTANCE);
+
         reactor.set(Bool,   "declared",   BoolType.INSTANCE);
         reactor.set(Int,    "declared",    IntType.INSTANCE);
         reactor.set(Float,  "declared",  FloatType.INSTANCE);
@@ -57,11 +71,20 @@ public final class RootScope extends Scope
         reactor.set(Void,   "declared",   VoidType.INSTANCE);
         reactor.set(Type,   "declared",   TypeType.INSTANCE);
 
+        /* VIBE */
+        reactor.set(ChanInt, "declared", ChanType.INSTANCE);
+        reactor.set(ChanFloat,   "declared",   ChanType.INSTANCE);
+        reactor.set(ChanString,   "declared",   ChanType.INSTANCE);
+
         reactor.set(_true,  "type",       BoolType.INSTANCE);
         reactor.set(_false, "type",       BoolType.INSTANCE);
         reactor.set(_null,  "type",       NullType.INSTANCE);
 
         reactor.set(print,  "type", new FunType(StringType.INSTANCE, StringType.INSTANCE));
+
+        /* VIBE */
+        reactor.set(make,  "type", new FunType(ChanType.INSTANCE, ChanType.INSTANCE));
+        reactor.set(close,  "type", new FunType(VoidType.INSTANCE, ChanType.INSTANCE));
     }
 
     // ---------------------------------------------------------------------------------------------

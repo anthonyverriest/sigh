@@ -125,10 +125,11 @@ public final class SemanticAnalysis
         walker.register(AssignmentNode.class,           PRE_VISIT,  analysis::assignment);
 
         /* VIBE */
-        /*walker.register(ChannelIntLiteralNode.class,           PRE_VISIT,  analysis::intLiteral);
-        walker.register(ChannelFloatLiteralNode.class,         PRE_VISIT,  analysis::floatLiteral);
-        walker.register(ChannelStringLiteralNode.class,        PRE_VISIT,  analysis::stringLiteral);*/
+        walker.register(ChanIntLiteralNode.class,           PRE_VISIT,  analysis::chanIntLiteral);
+        walker.register(ChanFloatLiteralNode.class,         PRE_VISIT,  analysis::chanFloatLiteral);
+        walker.register(ChanStringLiteralNode.class,        PRE_VISIT,  analysis::chanStringLiteral);
         walker.register(ChannelExpressionNode.class,     PRE_VISIT,  analysis::channelExpression);
+        walker.register(ChannelAssignmentNode.class,           PRE_VISIT,  analysis::channelAssignment);
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
@@ -180,6 +181,21 @@ public final class SemanticAnalysis
 
     private void stringLiteral (StringLiteralNode node) {
         R.set(node, "type", StringType.INSTANCE);
+    }
+
+    /* VIBE */
+    // ---------------------------------------------------------------------------------------------
+
+    private void chanStringLiteral (ChanStringLiteralNode node) {
+        R.set(node, "type", ChanStringType.INSTANCE);
+    }
+
+    private void chanIntLiteral (ChanIntLiteralNode node) {
+        R.set(node, "type", ChanIntType.INSTANCE);
+    }
+
+    private void chanFloatLiteral (ChanFloatLiteralNode node) {
+        R.set(node, "type", ChanFloatType.INSTANCE);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -497,12 +513,31 @@ public final class SemanticAnalysis
     {
         assert node.operator == ChannelOperator.IO; // only one for now
 
+        /*Type opType = r.get(0);
+
+        if (opType instanceof ChanStringType)
+            r.set(node, "type", ChanStringType.INSTANCE);
+        else if (opType instanceof ChanIntType)
+            r.set(0, "type", ChanIntType.INSTANCE);
+        else if (opType instanceof ChanFloatType)
+            r.set(0, "type", ChanFloatType.INSTANCE);
+
+        R.set(node, "type", ChanStringType.INSTANCE);*/
+
+        R.set(node, "type", ChanType.INSTANCE);
+
         R.rule()
             .using(node.operand, "type")
             .by(r -> {
                 Type opType = r.get(0);
-                if (!(opType instanceof BoolType))
-                    r.error("Trying to negate type: " + opType, node);
+               /* if (opType instanceof ChanStringType)
+                    r.set(1, "type", ChanStringType.INSTANCE);
+                else if (opType instanceof ChanIntType)
+                    r.set(0, "type", ChanIntType.INSTANCE);
+                else if (opType instanceof ChanFloatType)
+                    r.set(0, "type", ChanFloatType.INSTANCE);
+                else
+                    r.error("Trying to negate type: " + opType, node);*/
             });
     }
 
@@ -610,6 +645,39 @@ public final class SemanticAnalysis
             else
                 r.errorFor("Trying to assign to an non-lvalue expression.", node.left);
         });
+    }
+
+    /* VIBE */
+
+    private void channelAssignment (ChannelAssignmentNode node)
+    {
+        R.rule(node, "type")
+            .using(node.left.attr("type"), node.right.attr("type"))
+            .by(r -> {
+                Type left  = r.get(0);
+                Type right = r.get(1);
+
+                r.set(0, r.get(0)); // the type of the assignment is the left-side type
+
+                if (node.left instanceof ReferenceNode) {
+                    if (!isChannelAssignableTo(right, left))
+                        r.errorFor("Trying to assign a value to a non-compatible lvalue.", node);
+                }
+                else
+                    r.errorFor("Trying to assign to an non-lvalue expression.", node.left);
+            });
+    }
+
+    private static boolean isChannelAssignableTo (Type a, Type b)
+    {
+        if (a instanceof StringType && b instanceof ChanType) //TODO
+            return true;
+        if (a instanceof IntType && b instanceof ChanIntType)
+            return true;
+        if (a instanceof FloatType && b instanceof ChanFloatType)
+            return true;
+
+        return false;
     }
 
     // endregion

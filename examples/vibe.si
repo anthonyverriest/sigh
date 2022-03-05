@@ -2,7 +2,7 @@ fun main (args: String) {
     var fizz: ChanString = make(ChanString) //create a channel of type String
     var buzz: ChanString = make(ChanString)
     var i: Int = 0
-    while i <= num {
+    while i <= 10 {
         if i % 5 == 0 && i % 7 == 0
             print("fizzbuzz")
         else if i % 5 == 0
@@ -10,9 +10,9 @@ fun main (args: String) {
         else if i % 7 == 0
             buzz <- "buzz"
         else
-            var fizzOut: String = <- fizz //receive value from channel
+            var fizzOut: String = <-fizz //receive value from channel
             print(fizzOut)
-            var buzzOut: String = <- buzz
+            var buzzOut: String = <-buzz
             print(buzzOut)
             print(i + "")
         i = i + 1
