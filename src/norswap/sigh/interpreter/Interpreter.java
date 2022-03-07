@@ -432,10 +432,23 @@ public final class Interpreter
 
     private Object builtin (String name, Object[] args)
     {
-        assert name.equals("print"); // only one at the moment
-        String out = convertToString(args[0]);
-        System.out.println(out);
-        return out;
+        //assert name.equals("print"); // only one at the moment, not anymore
+        switch (name){
+            case "print":
+                String out = convertToString(args[0]);
+                System.out.println(out);
+                return out;
+            case "make":
+                //TODO
+                System.out.println("make");
+                System.out.println(args[0]);
+                return new Channel<String>();
+            case "close":
+                ((Channel<?>) args[0]).close();
+                break;
+        }
+
+        return null;
     }
 
     // ---------------------------------------------------------------------------------------------

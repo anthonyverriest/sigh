@@ -8,4 +8,9 @@ public class ChanType extends Type{
     @Override public String name() {
         return "ChanType";
     }
+
+
+
 }
+
+

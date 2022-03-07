@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
 import static norswap.sigh.ast.ChannelOperator.IO;
+import static norswap.sigh.scopes.DeclarationKind.FUNCTION;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
@@ -130,6 +131,8 @@ public final class SemanticAnalysis
         walker.register(ChanStringLiteralNode.class,        PRE_VISIT,  analysis::chanStringLiteral);
         walker.register(ChannelExpressionNode.class,     PRE_VISIT,  analysis::channelExpression);
         walker.register(ChannelAssignmentNode.class,           PRE_VISIT,  analysis::channelAssignment);
+        walker.register(ChannelOutAssignmentNode.class,           PRE_VISIT,  analysis::channelOutAssignment);
+        walker.register(ChannelMakeDeclarationNode.class,           PRE_VISIT,  analysis::channelMake);
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
@@ -158,6 +161,7 @@ public final class SemanticAnalysis
         walker.register(ChannelStatementNode.class,     PRE_VISIT,  node -> {});
 
         walker.registerFallback(POST_VISIT, node -> {});
+
 
         return walker;
     }
@@ -524,7 +528,7 @@ public final class SemanticAnalysis
 
         R.set(node, "type", ChanStringType.INSTANCE);*/
 
-        R.set(node, "type", ChanType.INSTANCE);
+        R.set(node, "type", StringType.INSTANCE); //TODO
 
         R.rule()
             .using(node.operand, "type")
@@ -648,8 +652,15 @@ public final class SemanticAnalysis
     }
 
     /* VIBE */
+    private void channelMake(ChannelMakeDeclarationNode node){
+        this.inferenceContext = node;
 
-    private void channelAssignment (ChannelAssignmentNode node)
+        R.rule(node, "type")
+            .using(node.type, "value")
+            .by(Rule::copyFirst);
+    }
+
+    private void channelOutAssignment (ChannelOutAssignmentNode node)
     {
         R.rule(node, "type")
             .using(node.left.attr("type"), node.right.attr("type"))
@@ -659,6 +670,46 @@ public final class SemanticAnalysis
 
                 r.set(0, r.get(0)); // the type of the assignment is the left-side type
 
+                if (node.left instanceof ReferenceNode) {
+                    if (!isChannelAssignableTo(left, right))
+                        r.errorFor("Trying to assign a value to a non-compatible lvalue.", node);
+                }
+                else
+                    r.errorFor("Trying to assign to an non-lvalue expression.", node.left);
+            });
+    }
+
+    private static boolean isChannelOutAssignableTo (Type a, Type b) //TODO duplicated code
+    {
+        if (a instanceof StringType && b instanceof ChanStringType) //TODO
+            return true;
+        if (a instanceof IntType && b instanceof ChanIntType)
+            return true;
+        if (a instanceof FloatType && b instanceof ChanFloatType)
+            return true;
+
+        return false;
+    }
+
+    private void channelAssignment (ChannelAssignmentNode node)
+    {
+
+
+
+
+
+
+        R.rule(node, "type")
+            .using(node.left.attr("type"), node.right.attr("type"))
+            .by(r -> {
+                Type left  = r.get(0);
+                Type right = r.get(1);
+
+                r.set(0, r.get(0)); // the type of the assignment is the left-side type
+
+
+
+                r.error(left.name(), node);
                 if (node.left instanceof ReferenceNode) {
                     if (!isChannelAssignableTo(right, left))
                         r.errorFor("Trying to assign a value to a non-compatible lvalue.", node);
@@ -670,7 +721,8 @@ public final class SemanticAnalysis
 
     private static boolean isChannelAssignableTo (Type a, Type b)
     {
-        if (a instanceof StringType && b instanceof ChanType) //TODO
+
+        if (a instanceof StringType && b instanceof ChanStringType) //TODO
             return true;
         if (a instanceof IntType && b instanceof ChanIntType)
             return true;

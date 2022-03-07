@@ -54,6 +54,7 @@ public class SighGrammar extends Grammar
 
     /* VIBE */
     public rule ARROW = word("<-");
+    public rule _make = word("make");
 
     public rule _var            = reserved("var");
     public rule _fun            = reserved("fun");
@@ -213,7 +214,7 @@ public class SighGrammar extends Grammar
     public rule channel_assignment_expression = right_expression()
         .operand(channel_expr)
         .infix(EQUALS,
-            $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
+            $ -> new ChannelOutAssignmentNode($.span(), $.$[0], $.$[1]));
 
 
     public rule channel_value =  choice(string, integer, floating);
@@ -234,19 +235,10 @@ public class SighGrammar extends Grammar
             });
 
 
-    public rule expression = lazy(() -> choice(seq(assignment_expression), channel_assignment_expression));
 
 
 
 
-    public rule expression_stmt =
-        expression
-        .filter($ -> {
-            if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode))
-                return false;
-            $.push(new ExpressionStatementNode($.span(), $.$[0]));
-            return true;
-        });
 
     public rule array_type = left_expression()
         .left(simple_type)
@@ -256,10 +248,29 @@ public class SighGrammar extends Grammar
     public rule type =
         seq(array_type);
 
+
+    /* VIEBE */
+    public rule make_decl = seq(_make, LPAREN, type, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
+
+    public rule expression = lazy(() -> choice(make_decl, seq(assignment_expression), channel_assignment_expression));
+
+    public rule expression_stmt =
+        expression
+            .filter($ -> {
+                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof ChannelOutAssignmentNode || $.$[0] instanceof FunCallNode))
+                    return false;
+                $.push(new ExpressionStatementNode($.span(), $.$[0]));
+                return true;
+            });
+
+
+
     public rule statement = lazy(() -> choice(
         this.block,
+        //this.make_decl, // VIBE
         this.var_decl,
         this.fun_decl,
+
         this.struct_decl,
         this.if_stmt,
         this.while_stmt,
@@ -321,6 +332,11 @@ public class SighGrammar extends Grammar
         seq(ws, statement.at_least(1))
         .as_list(StatementNode.class)
         .push($ -> new RootNode($.span(), $.$[0]));
+
+
+
+
+
 
     @Override public rule root () {
         return root;
