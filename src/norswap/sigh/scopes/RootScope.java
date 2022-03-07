@@ -44,8 +44,7 @@ public final class RootScope extends Scope
     public final SyntheticDeclarationNode print = decl("print", FUNCTION);
 
     /* VIBE */
-    //public final SyntheticDeclarationNode makeString = decl("make", FUNCTION);
-    public final SyntheticDeclarationNode close = decl("close", FUNCTION);
+    //public final SyntheticDeclarationNode close = decl("close", FUNCTION);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -85,19 +84,7 @@ public final class RootScope extends Scope
 
         /* VIBE */
 
-        //reactor.set(makeString,  "type", new FunType(ChanStringType.INSTANCE, ChanStringType.INSTANCE));
-
-            //reactor.set(makeString.clone(),  "type", new FunType(ChanIntType.INSTANCE, ChanIntType.INSTANCE));
-        //reactor.set(makeString,  "type", new FunType(ChanType.INSTANCE, ChanType.INSTANCE));
-        reactor.set(close,  "type", new FunType(VoidType.INSTANCE, ChanType.INSTANCE));
-
-
-        /*reactor.set(makeFloat,  "type", new FunType(ChanFloatType.INSTANCE, ChanFloatType.INSTANCE));
-
-        reactor.set(closeFloat,  "type", new FunType(VoidType.INSTANCE, ChanFloatType.INSTANCE));
-
-        reactor.set(closeInt,  "type", new FunType(VoidType.INSTANCE, ChanIntType.INSTANCE));*/
-
+       // reactor.set(close,  "type", new FunType(VoidType.INSTANCE, ChanType.INSTANCE));
     }
 
     // ---------------------------------------------------------------------------------------------

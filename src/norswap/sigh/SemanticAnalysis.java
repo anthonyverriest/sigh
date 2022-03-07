@@ -657,7 +657,13 @@ public final class SemanticAnalysis
 
         R.rule(node, "type")
             .using(node.type, "value")
-            .by(Rule::copyFirst);
+            .by(r -> {
+                Type type = r.get(0);
+                if(!(type instanceof ChanIntType) && !(type instanceof ChanStringType) && !(type instanceof ChanFloatType))
+                    r.error("invalid type passed to function make", node);
+                else
+                    r.copyFirst();
+            });
     }
 
     private void channelOutAssignment (ChannelOutAssignmentNode node)

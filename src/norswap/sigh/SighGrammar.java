@@ -55,6 +55,7 @@ public class SighGrammar extends Grammar
     /* VIBE */
     public rule ARROW = word("<-");
     public rule _make = word("make");
+    public rule _close= word("close");
 
     public rule _var            = reserved("var");
     public rule _fun            = reserved("fun");
@@ -252,6 +253,8 @@ public class SighGrammar extends Grammar
     /* VIEBE */
     public rule make_decl = seq(_make, LPAREN, type, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
 
+    public rule close_decl = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
+
     public rule expression = lazy(() -> choice(make_decl, seq(assignment_expression), channel_assignment_expression));
 
     public rule expression_stmt =
@@ -267,10 +270,9 @@ public class SighGrammar extends Grammar
 
     public rule statement = lazy(() -> choice(
         this.block,
-        //this.make_decl, // VIBE
+        this.close_decl, // VIBE
         this.var_decl,
         this.fun_decl,
-
         this.struct_decl,
         this.if_stmt,
         this.while_stmt,

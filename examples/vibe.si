@@ -6,9 +6,11 @@ fun main (args: String) {
         if i % 5 == 0 && i % 7 == 0
             print("fizzbuzz")
         else if i % 5 == 0
-            fizz <- "fizz" //send value to channel
+            //fizz <- "fizz" //send value to channel
+            print("33")
         else if i % 7 == 0
-            buzz <- "buzz"
+            //buzz <- "buzz"
+            print("33")
         else
             var fizzOut: String = <-fizz //receive value from channel
             //print(fizzOut)
@@ -17,8 +19,8 @@ fun main (args: String) {
             print(i + "")
         i = i + 1
     }
-    close(fizz) //close channel
-    close(buzz)
+    //close(fizz) //close channel
+    //close(buzz)
 }
 
 main("")
