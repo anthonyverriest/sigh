@@ -166,6 +166,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
         // implicit conversions
         successInput("var x: Float = 1 ; x = 2");
+
+        /* VIBE */
+        successInput("var x : ChanInt = null");
+        successInput("var x : ChanString = null");
+        successInput("var x : ChanFloat = null");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -298,6 +303,32 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         //   not the whole function declaration
         failureInputWith("fun f(): Int { if (true) return 1 } ; return f()",
             "Missing return in function");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void testMake()
+    {
+        /* VIBE */
+        successInput("var x : ChanInt = make(ChanInt)");
+        successInput("var x : ChanString = make(ChanString)");
+        successInput("var x : ChanFloat = make(ChanFloat)");
+
+        // Edge cases
+        failureInputWith("var x : Int = make(ChanInt)",
+            "expected Int but got ChanInt");
+        failureInputWith("var x : String = make(ChanString)",
+            "expected String but got ChanString");
+        failureInputWith("var x : Float = make(ChanFloat)",
+            "expected Float but got ChanFloat");
+
+        failureInputWith("var x : ChanInt = 0",
+            "expected ChanInt but got Int");
+        failureInputWith("var x : ChanString = \"\"",
+            "expected ChanString but got String");
+        failureInputWith("var x : ChanFloat = 0.0",
+            "expected ChanFloat but got Float");
+
     }
 
     // ---------------------------------------------------------------------------------------------
