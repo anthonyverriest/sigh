@@ -6,6 +6,7 @@ import norswap.autumn.positions.LineMapString;
 import norswap.sigh.SemanticAnalysis;
 import norswap.sigh.SighGrammar;
 import norswap.sigh.ast.SighNode;
+import norswap.sigh.interpreter.Channel;
 import norswap.sigh.interpreter.Interpreter;
 import norswap.sigh.interpreter.Null;
 import norswap.uranium.Reactor;
@@ -218,6 +219,11 @@ public final class InterpreterTests extends TestFixture {
 
         // implicit conversions
         check("var x: Float = 1; x = 2; return x", 2.0d);
+
+        /* VIBE */
+        check("var x : ChanString = make(ChanString); return x", new Channel<String>());
+        check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>());
+        check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>());
     }
 
     // ---------------------------------------------------------------------------------------------

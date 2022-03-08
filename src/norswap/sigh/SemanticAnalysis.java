@@ -655,6 +655,11 @@ public final class SemanticAnalysis
     private void channelMake(ChannelMakeDeclarationNode node){
         this.inferenceContext = node;
 
+        DeclarationContext ctx = scope.lookup(node.name);
+        DeclarationNode decl = ctx == null ? null : ctx.declaration;
+
+        R.set(node,"scope",decl);
+
         R.rule(node, "type")
             .using(node.type, "value")
             .by(r -> {
@@ -700,11 +705,6 @@ public final class SemanticAnalysis
     private void channelAssignment (ChannelAssignmentNode node)
     {
 
-
-
-
-
-
         R.rule(node, "type")
             .using(node.left.attr("type"), node.right.attr("type"))
             .by(r -> {
@@ -712,8 +712,6 @@ public final class SemanticAnalysis
                 Type right = r.get(1);
 
                 r.set(0, r.get(0)); // the type of the assignment is the left-side type
-
-
 
                 r.error(left.name(), node);
                 if (node.left instanceof ReferenceNode) {

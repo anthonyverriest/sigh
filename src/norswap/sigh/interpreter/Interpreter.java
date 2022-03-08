@@ -87,6 +87,8 @@ public final class Interpreter
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
 
+        visitor.register(ChannelMakeDeclarationNode.class , this::buildInMake);
+
         visitor.registerFallback(node -> null);
     }
 
@@ -410,6 +412,7 @@ public final class Interpreter
         if (decl instanceof Constructor)
             return buildStruct(((Constructor) decl).declaration, args);
 
+
         ScopeStorage oldStorage = storage;
         Scope scope = reactor.get(decl, "scope");
         storage = new ScopeStorage(scope, storage);
@@ -425,6 +428,22 @@ public final class Interpreter
         } finally {
             storage = oldStorage;
         }
+        return null;
+    }
+
+    private Object buildInMake (ChannelMakeDeclarationNode node) {
+
+        String decl = node.type.attr("type").node.toString();
+
+        switch (decl){
+            case "SimpleType(ChanInt)":
+                return new Channel<Integer>();
+            case "SimpleType(ChanString)":
+                return new Channel<String>();
+            case "SimpleType(ChanFloat)":
+                return new Channel<Float>();
+        }
+
         return null;
     }
 

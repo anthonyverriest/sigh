@@ -9,6 +9,7 @@ public class ChannelMakeDeclarationNode extends ExpressionNode
 {
 
     public final TypeNode type;
+    public final String name = "make";
 
     @SuppressWarnings("unchecked")
     public ChannelMakeDeclarationNode

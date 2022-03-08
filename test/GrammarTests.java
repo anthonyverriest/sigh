@@ -1,6 +1,7 @@
 import norswap.autumn.AutumnTestFixture;
 import norswap.sigh.SighGrammar;
 import norswap.sigh.ast.*;
+import norswap.sigh.types.ChanIntType;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
@@ -21,6 +22,9 @@ public class GrammarTests extends AutumnTestFixture {
     private static FloatLiteralNode floatlit (double d) {
         return new FloatLiteralNode(null, d);
     }
+
+    /* VIBE */
+
 
     // ---------------------------------------------------------------------------------------------
 
@@ -107,6 +111,10 @@ public class GrammarTests extends AutumnTestFixture {
                 asList(new ParameterNode(null, "x", new SimpleTypeNode(null, "Int"))),
                 new SimpleTypeNode(null, "Int"),
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
+
+        /* VIBE */
+        /*successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null,
+            "x", new ChanIntType(), new ChanIntLiteralNode(null,null)));*/
     }
 
     // ---------------------------------------------------------------------------------------------

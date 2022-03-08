@@ -196,11 +196,6 @@ public class SighGrammar extends Grammar
 
 
     /* VIBE */
-    public rule chan =
-        number
-            .push($ -> new ChanIntLiteralNode($.span(), $.$[0]))
-            .word(); //TODO
-
 
     public rule channel = left_expression()
         .left(reference);
@@ -234,12 +229,6 @@ public class SighGrammar extends Grammar
                 $.push(new ExpressionStatementNode($.span(), $.$[0]));
                 return true;
             });
-
-
-
-
-
-
 
     public rule array_type = left_expression()
         .left(simple_type)
@@ -334,11 +323,6 @@ public class SighGrammar extends Grammar
         seq(ws, statement.at_least(1))
         .as_list(StatementNode.class)
         .push($ -> new RootNode($.span(), $.$[0]));
-
-
-
-
-
 
     @Override public rule root () {
         return root;

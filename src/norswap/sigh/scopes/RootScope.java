@@ -44,7 +44,7 @@ public final class RootScope extends Scope
     public final SyntheticDeclarationNode print = decl("print", FUNCTION);
 
     /* VIBE */
-    //public final SyntheticDeclarationNode close = decl("close", FUNCTION);
+    public final SyntheticDeclarationNode make = decl("make", FUNCTION);
 
     // ---------------------------------------------------------------------------------------------
 
