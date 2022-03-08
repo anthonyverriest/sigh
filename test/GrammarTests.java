@@ -113,8 +113,13 @@ public class GrammarTests extends AutumnTestFixture {
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
 
         /* VIBE */
-        /*successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null,
-            "x", new ChanIntType(), new ChanIntLiteralNode(null,null)));*/
+        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null,
+            "x", new SimpleTypeNode(null, "ChanInt"), new ExpressionNode(null) {
+            @Override
+            public String contents () {
+                return null;
+            }
+        }));
     }
 
     // ---------------------------------------------------------------------------------------------

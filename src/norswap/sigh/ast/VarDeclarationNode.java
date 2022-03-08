@@ -2,6 +2,7 @@ package norswap.sigh.ast;
 
 import norswap.autumn.positions.Span;
 import norswap.utils.Util;
+import java.util.Objects;
 
 public final class VarDeclarationNode extends DeclarationNode
 {
@@ -26,5 +27,17 @@ public final class VarDeclarationNode extends DeclarationNode
 
     @Override public String declaredThing () {
         return "variable";
+    }
+
+    @Override
+    public boolean equals (Object o) {
+        if (this == o) return true;
+        VarDeclarationNode that = (VarDeclarationNode) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode () {
+        return Objects.hash(super.hashCode(), name, type, initializer);
     }
 }
