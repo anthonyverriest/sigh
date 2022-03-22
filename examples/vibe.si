@@ -8,16 +8,16 @@ fun main (args: String) {
             print("fizzbuzz")
         }
         else if i % 5 == 0 {
-            fizz <- "fizz" //send value to channel
-            print("33")
+            fizz <- "fizzy" //send value to channel
+            print("receive")
+            var fizzOut: String = <-fizz //receive value from channel
+            print(fizzOut)
         }
         else if i % 7 == 0 {
-            buzz <- "buzz"
+            //buzz <- "buzz"
             print("33")
         }
         else {
-            //var fizzOut: String = <-fizz //receive value from channel
-            //print(fizzOut)
             //var buzzOut: String = <-buzz
             //print(buzzOut)
             print(i + "")

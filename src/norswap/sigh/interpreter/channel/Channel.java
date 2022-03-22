@@ -27,6 +27,17 @@ public class Channel<T> {
         }
     }
 
+    public T receive(){
+        if(isOpen()){
+            try{
+                return this.queue.take();
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+        throw new BrokenChannel();
+    }
+
     public boolean isOpen(){
         return isOpen;
     }
