@@ -189,10 +189,6 @@ public class SighGrammar extends Grammar
         .infix(BAR_BAR.as_val(BinaryOperator.OR),
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
-
-
-
-
     public rule array_type = left_expression()
         .left(simple_type)
         .suffix(seq(LSQUARE, RSQUARE),
@@ -203,7 +199,7 @@ public class SighGrammar extends Grammar
 
 
     /* VIBE */
-
+/*
     public rule channel = left_expression()
         .left(reference);
 
@@ -220,7 +216,10 @@ public class SighGrammar extends Grammar
             $ -> new ChannelOutAssignmentNode($.span(), $.$[0], $.$[1]));
 
 
-    public rule channel_value =  choice(string, integer, floating);
+
+
+
+
 
     public rule channel_expression =  left_expression()
         .right(channel_value)
@@ -237,24 +236,35 @@ public class SighGrammar extends Grammar
                 return true;
             });
 
-
+*/
 
 
     /* VIEBE */
-    public rule close_decl = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
+    public rule close_stmt = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
     public rule make_decl = seq(_make, LPAREN, simple_type, RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0]));
 
-    public rule make_expression = lazy(() -> choice(make_decl, or_expression));
+
+
+
+    public rule channel_expression = lazy(() -> choice(make_decl, or_expression));
+
+
+    public rule channel_value =  choice(string, integer, floating);
+
+    public rule channel_in_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelInStatementNode($.span(), $.$[0], $.$[1]));
+
+
+
 
 
 
     public rule assignment_expression = right_expression()
-        .operand(make_expression) //or_expression
+        .operand(channel_expression) //or_expression
         .infix(EQUALS,
             $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
 
-    public rule expression = lazy(() -> choice(seq(assignment_expression), channel_assignment_expression));
+    public rule expression = lazy(() -> choice(seq(assignment_expression)));
 
     public rule expression_stmt =
         expression
@@ -269,14 +279,15 @@ public class SighGrammar extends Grammar
 
     public rule statement = lazy(() -> choice(
         this.block,
-        this.close_decl, // VIBE
+        this.close_stmt, // VIBE
         this.var_decl,
         this.fun_decl,
         this.struct_decl,
         this.if_stmt,
         this.while_stmt,
         this.return_stmt,
-        this.channel_stmt, // Vibe
+        this.channel_in_stmt,
+        //this.channel_stmt, // Vibe
         this.expression_stmt));
 
     public rule statements =

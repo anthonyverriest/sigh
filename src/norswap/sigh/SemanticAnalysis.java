@@ -133,6 +133,8 @@ public final class SemanticAnalysis
 
         walker.register(ChannelMakeExpressionNode.class,           PRE_VISIT,  analysis::channelMake);
         walker.register(ChannelCloseStatementNode.class,           PRE_VISIT,  analysis::channelClose);
+        walker.register(ChannelInStatementNode.class,           PRE_VISIT,  analysis::channelIn);
+
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
@@ -652,9 +654,22 @@ public final class SemanticAnalysis
     }
 
     /* VIBE */
+    private void channelIn(ChannelInStatementNode node){
+        R.rule(node, "value")
+            .using(node.value.attr("type"), node.channel.attr("type"))
+            .by(r -> {
+                Type right = r.get(0);
+                Type left = r.get(1);
+                if(!(left instanceof ChanStringType && right instanceof StringType || left instanceof ChanIntType && right instanceof IntType || left instanceof ChanFloatType && right instanceof FloatType) )
+                    r.error("invalid type passed to channel : " +  left + " <- " + right, node);
+                else
+                    r.copyFirst();
+            });
+    }
+
     private void channelClose(ChannelCloseStatementNode node){
         R.rule(node, "value")
-            .using(node.ref, "type")
+            .using(node.channel, "type")
             .by(r -> {
                 Type type = r.get(0);
                 if(!(type instanceof ChanIntType) && !(type instanceof ChanStringType) && !(type instanceof ChanFloatType))

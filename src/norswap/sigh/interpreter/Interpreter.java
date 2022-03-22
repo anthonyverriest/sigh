@@ -86,6 +86,7 @@ public final class Interpreter
 
         visitor.register(ChannelMakeExpressionNode.class , this::buildInMake);
         visitor.register(ChannelCloseStatementNode.class , this::buildInClose);
+        visitor.register(ChannelInStatementNode.class , this::channelIn);
 
 
         visitor.registerFallback(node -> null);
@@ -430,8 +431,15 @@ public final class Interpreter
         return null;
     }
 
+    /* VIBE */
+    private Void channelIn(ChannelInStatementNode node){
+        Object channel = visitor.apply(node.channel);
+        System.out.println("send to chan " +channel);
+        return null;
+    }
+
     private Void buildInClose(ChannelCloseStatementNode node){
-        Object channel = visitor.apply(node.ref);
+        Object channel = visitor.apply(node.channel);
         ((Channel<?>) channel).close();
         return null;
     }
