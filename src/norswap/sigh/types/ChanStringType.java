@@ -1,6 +1,6 @@
 package norswap.sigh.types;
 
-public class ChanStringType extends ChanType{
+public class ChanStringType extends Type{
 
     public static final ChanStringType INSTANCE = new ChanStringType();
     private ChanStringType () {

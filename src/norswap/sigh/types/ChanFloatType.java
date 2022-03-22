@@ -1,6 +1,6 @@
 package norswap.sigh.types;
 
-public class ChanFloatType extends ChanType{
+public class ChanFloatType extends Type{
 
     public static final ChanFloatType INSTANCE = new ChanFloatType();
     protected ChanFloatType () {}
