@@ -5,19 +5,14 @@ import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
 import norswap.sigh.scopes.SyntheticDeclarationNode;
-import norswap.sigh.types.FloatType;
-import norswap.sigh.types.IntType;
-import norswap.sigh.types.StringType;
-import norswap.sigh.types.Type;
+import norswap.sigh.types.*;
 import norswap.uranium.Reactor;
 import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -89,7 +84,7 @@ public final class Interpreter
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
 
-        visitor.register(ChannelMakeDeclarationNode.class , this::buildInMake);
+        visitor.register(ChannelMakeExpressionNode.class , this::buildInMake);
         visitor.register(ChannelCloseStatementNode.class , this::buildInClose);
 
 
@@ -441,17 +436,17 @@ public final class Interpreter
         return null;
     }
 
-    private Object buildInMake (ChannelMakeDeclarationNode node) {
+    private Object buildInMake (ChannelMakeExpressionNode node) {
+        Object decl = reactor.get(node, "type");
 
-        String decl = node.type.attr("type").node.toString();
-
-        switch (decl){
-            case "SimpleType(ChanInt)":
-                return new Channel<Integer>();
-            case "SimpleType(ChanString)":
-                return new Channel<String>();
-            case "SimpleType(ChanFloat)":
-                return new Channel<Float>();
+        if (decl instanceof ChanStringType){
+            return new Channel<String>();
+        }
+        if (decl instanceof ChanFloatType){
+            return new Channel<Float>();
+        }
+        if (decl instanceof ChanIntType){
+            return new Channel<Integer>();
         }
 
         return null;
@@ -462,19 +457,10 @@ public final class Interpreter
     private Object builtin (String name, Object[] args)
     {
         //assert name.equals("print"); // only one at the moment, not anymore
-        switch (name){
-            case "print":
-                String out = convertToString(args[0]);
-                System.out.println(out);
-                return out;
-            case "make":
-                //TODO
-                System.out.println("make");
-                System.out.println(args[0]);
-                return new Channel<String>();
-            case "close":
-                ((Channel<?>) args[0]).close();
-                break;
+        if ("print".equals(name)) {
+            String out = convertToString(args[0]);
+            System.out.println(out);
+            return out;
         }
 
         return null;

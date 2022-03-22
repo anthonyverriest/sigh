@@ -189,10 +189,17 @@ public class SighGrammar extends Grammar
         .infix(BAR_BAR.as_val(BinaryOperator.OR),
             $ -> new BinaryExpressionNode($.span(), $.$[0], $.$[1], $.$[2]));
 
-    public rule assignment_expression = right_expression()
-        .operand(or_expression) //or_expression
-        .infix(EQUALS,
-            $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
+
+
+
+
+    public rule array_type = left_expression()
+        .left(simple_type)
+        .suffix(seq(LSQUARE, RSQUARE),
+            $ -> new ArrayTypeNode($.span(), $.$[0]));
+
+    public rule type =
+        seq(array_type);
 
 
     /* VIBE */
@@ -230,21 +237,24 @@ public class SighGrammar extends Grammar
                 return true;
             });
 
-    public rule array_type = left_expression()
-        .left(simple_type)
-        .suffix(seq(LSQUARE, RSQUARE),
-            $ -> new ArrayTypeNode($.span(), $.$[0]));
 
-    public rule type =
-        seq(array_type);
 
 
     /* VIEBE */
-    public rule make_decl = seq(_make, LPAREN, type, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
-
     public rule close_decl = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
-    public rule expression = lazy(() -> choice(make_decl, seq(assignment_expression), channel_assignment_expression));
+    public rule make_decl = seq(_make, LPAREN, simple_type, RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0]));
+
+    public rule make_expression = lazy(() -> choice(make_decl, or_expression));
+
+
+
+    public rule assignment_expression = right_expression()
+        .operand(make_expression) //or_expression
+        .infix(EQUALS,
+            $ -> new AssignmentNode($.span(), $.$[0], $.$[1]));
+
+    public rule expression = lazy(() -> choice(seq(assignment_expression), channel_assignment_expression));
 
     public rule expression_stmt =
         expression

@@ -19,8 +19,6 @@ import java.util.stream.IntStream;
 
 import static java.lang.String.format;
 import static norswap.sigh.ast.BinaryOperator.*;
-import static norswap.sigh.ast.ChannelOperator.IO;
-import static norswap.sigh.scopes.DeclarationKind.FUNCTION;
 import static norswap.utils.Util.cast;
 import static norswap.utils.Vanilla.forEachIndexed;
 import static norswap.utils.Vanilla.list;
@@ -133,7 +131,7 @@ public final class SemanticAnalysis
         walker.register(ChannelAssignmentNode.class,           PRE_VISIT,  analysis::channelAssignment);
         walker.register(ChannelOutAssignmentNode.class,           PRE_VISIT,  analysis::channelOutAssignment);
 
-        walker.register(ChannelMakeDeclarationNode.class,           PRE_VISIT,  analysis::channelMake);
+        walker.register(ChannelMakeExpressionNode.class,           PRE_VISIT,  analysis::channelMake);
         walker.register(ChannelCloseStatementNode.class,           PRE_VISIT,  analysis::channelClose);
 
         // types
@@ -666,14 +664,7 @@ public final class SemanticAnalysis
             });
     }
 
-    private void channelMake(ChannelMakeDeclarationNode node){
-        this.inferenceContext = node;
-
-        DeclarationContext ctx = scope.lookup(node.name);
-        DeclarationNode decl = ctx == null ? null : ctx.declaration;
-
-        R.set(node,"scope",decl);
-
+    private void channelMake(ChannelMakeExpressionNode node){
         R.rule(node, "type")
             .using(node.type, "value")
             .by(r -> {

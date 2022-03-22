@@ -43,8 +43,6 @@ public final class RootScope extends Scope
     // root scope functions
     public final SyntheticDeclarationNode print = decl("print", FUNCTION);
 
-    /* VIBE */
-    public final SyntheticDeclarationNode make = decl("make", FUNCTION);
 
     // ---------------------------------------------------------------------------------------------
 
@@ -82,9 +80,6 @@ public final class RootScope extends Scope
 
         reactor.set(print,  "type", new FunType(StringType.INSTANCE, StringType.INSTANCE));
 
-        /* VIBE */
-
-       // reactor.set(close,  "type", new FunType(VoidType.INSTANCE, ChanType.INSTANCE));
     }
 
     // ---------------------------------------------------------------------------------------------
