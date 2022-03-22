@@ -1,6 +1,7 @@
 package norswap.sigh.interpreter;
 
 import norswap.sigh.ast.*;
+import norswap.sigh.interpreter.channel.Channel;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
@@ -84,6 +85,7 @@ public final class Interpreter
         visitor.register(WhileNode.class,                this::whileStmt);
         visitor.register(ReturnNode.class,               this::returnStmt);
 
+        /* VIBE */
         visitor.register(ChannelMakeExpressionNode.class , this::buildInMake);
         visitor.register(ChannelCloseStatementNode.class , this::buildInClose);
         visitor.register(ChannelInStatementNode.class , this::channelIn);
@@ -433,8 +435,7 @@ public final class Interpreter
 
     /* VIBE */
     private Void channelIn(ChannelInStatementNode node){
-        Object channel = visitor.apply(node.channel);
-        System.out.println("send to chan " +channel);
+        //((Channel<?>) channel).send(message); undo comment afetr receive implementation
         return null;
     }
 

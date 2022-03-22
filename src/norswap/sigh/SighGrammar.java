@@ -199,61 +199,16 @@ public class SighGrammar extends Grammar
 
 
     /* VIBE */
-/*
-    public rule channel = left_expression()
-        .left(reference);
-
-    public rule channel_expr =
-        right_expression()
-            .operand(channel)
-            .prefix(ARROW.as_val(ChannelOperator.IO),
-                $ -> new ChannelExpressionNode($.span(), $.$[0], $.$[1]));
-
-
-    public rule channel_assignment_expression = right_expression()
-        .operand(channel_expr)
-        .infix(EQUALS,
-            $ -> new ChannelOutAssignmentNode($.span(), $.$[0], $.$[1]));
-
-
-
-
-
-
-
-    public rule channel_expression =  left_expression()
-        .right(channel_value)
-        .left(reference)
-        .infix(ARROW,
-            $ -> new ChannelAssignmentNode($.span(), $.$[0], $.$[1])); //todo change node :: channel statement
-
-    public rule channel_stmt =
-        channel_expression
-            .filter($ -> {
-                if (!($.$[0] instanceof ChannelAssignmentNode || $.$[0] instanceof FunCallNode))
-                    return false;
-                $.push(new ExpressionStatementNode($.span(), $.$[0]));
-                return true;
-            });
-
-*/
-
-
-    /* VIEBE */
     public rule close_stmt = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
     public rule make_decl = seq(_make, LPAREN, simple_type, RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0]));
 
 
-
-
     public rule channel_expression = lazy(() -> choice(make_decl, or_expression));
-
 
     public rule channel_value =  choice(string, integer, floating);
 
     public rule channel_in_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelInStatementNode($.span(), $.$[0], $.$[1]));
-
 
 
 
@@ -269,7 +224,7 @@ public class SighGrammar extends Grammar
     public rule expression_stmt =
         expression
             .filter($ -> {
-                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof ChannelOutAssignmentNode || $.$[0] instanceof FunCallNode))
+                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode))
                     return false;
                 $.push(new ExpressionStatementNode($.span(), $.$[0]));
                 return true;
@@ -286,8 +241,7 @@ public class SighGrammar extends Grammar
         this.if_stmt,
         this.while_stmt,
         this.return_stmt,
-        this.channel_in_stmt,
-        //this.channel_stmt, // Vibe
+        this.channel_in_stmt, //VIBE
         this.expression_stmt));
 
     public rule statements =

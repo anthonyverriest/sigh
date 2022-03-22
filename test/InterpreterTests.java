@@ -6,7 +6,7 @@ import norswap.autumn.positions.LineMapString;
 import norswap.sigh.SemanticAnalysis;
 import norswap.sigh.SighGrammar;
 import norswap.sigh.ast.SighNode;
-import norswap.sigh.interpreter.Channel;
+import norswap.sigh.interpreter.channel.Channel;
 import norswap.sigh.interpreter.Interpreter;
 import norswap.sigh.interpreter.Null;
 import norswap.uranium.Reactor;

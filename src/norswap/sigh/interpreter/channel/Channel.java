@@ -1,6 +1,5 @@
-package norswap.sigh.interpreter;
+package norswap.sigh.interpreter.channel;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -8,9 +7,24 @@ public class Channel<T> {
     private ArrayBlockingQueue<T> queue;
     private boolean isOpen;
 
-    public Channel () {
+    public Channel(){
         this.queue = new ArrayBlockingQueue<>(1);
         this.isOpen = true;
+    }
+
+    public void send(Object message) {
+        @SuppressWarnings("unchecked")
+        T msg = (T) message;
+
+        if(isOpen()){
+            try{
+                this.queue.put(msg);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }else{
+            throw new BrokenChannel();
+        }
     }
 
     public boolean isOpen(){
@@ -26,9 +40,9 @@ public class Channel<T> {
     @Override
     public boolean equals (Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Channel)) return false;
         Channel<?> channel = (Channel<?>) o;
-        return isOpen == channel.isOpen && Arrays.equals(queue.toArray(), channel.queue.toArray());
+        return isOpen == channel.isOpen && Objects.equals(queue, channel.queue);
     }
 
     @Override
