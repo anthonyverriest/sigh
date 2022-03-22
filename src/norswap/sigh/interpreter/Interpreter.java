@@ -88,6 +88,8 @@ public final class Interpreter
         visitor.register(ReturnNode.class,               this::returnStmt);
 
         visitor.register(ChannelMakeDeclarationNode.class , this::buildInMake);
+        visitor.register(ChannelCloseStatementNode.class , this::buildInClose);
+
 
         visitor.registerFallback(node -> null);
     }
@@ -429,6 +431,10 @@ public final class Interpreter
             storage = oldStorage;
         }
         return null;
+    }
+
+    private Object buildInClose(ChannelCloseStatementNode node){
+        return 3;
     }
 
     private Object buildInMake (ChannelMakeDeclarationNode node) {

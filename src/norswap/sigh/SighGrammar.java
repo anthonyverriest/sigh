@@ -242,7 +242,7 @@ public class SighGrammar extends Grammar
     /* VIEBE */
     public rule make_decl = seq(_make, LPAREN, type, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
 
-    public rule close_decl = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelMakeDeclarationNode($.span(), $.$[0]));
+    public rule close_decl = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
     public rule expression = lazy(() -> choice(make_decl, seq(assignment_expression), channel_assignment_expression));
 

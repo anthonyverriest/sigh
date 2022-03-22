@@ -132,7 +132,9 @@ public final class SemanticAnalysis
         walker.register(ChannelExpressionNode.class,     PRE_VISIT,  analysis::channelExpression);
         walker.register(ChannelAssignmentNode.class,           PRE_VISIT,  analysis::channelAssignment);
         walker.register(ChannelOutAssignmentNode.class,           PRE_VISIT,  analysis::channelOutAssignment);
+
         walker.register(ChannelMakeDeclarationNode.class,           PRE_VISIT,  analysis::channelMake);
+        walker.register(ChannelCloseStatementNode.class,           PRE_VISIT,  analysis::channelClose);
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
@@ -652,6 +654,18 @@ public final class SemanticAnalysis
     }
 
     /* VIBE */
+    private void channelClose(ChannelCloseStatementNode node){
+        R.rule(node, "value")
+            .using(node.ref, "type")
+            .by(r -> {
+                Type type = r.get(0);
+                if(!(type instanceof ChanIntType) && !(type instanceof ChanStringType) && !(type instanceof ChanFloatType))
+                    r.error("invalid type passed to function close", node);
+                else
+                    r.set(0, VoidType.INSTANCE);
+            });
+    }
+
     private void channelMake(ChannelMakeDeclarationNode node){
         this.inferenceContext = node;
 
