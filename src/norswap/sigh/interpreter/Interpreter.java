@@ -14,8 +14,10 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static norswap.utils.Util.cast;
@@ -433,8 +435,10 @@ public final class Interpreter
         return null;
     }
 
-    private Object buildInClose(ChannelCloseStatementNode node){
-        return 3;
+    private Void buildInClose(ChannelCloseStatementNode node){
+        Object channel = visitor.apply(node.ref);
+        ((Channel<?>) channel).close();
+        return null;
     }
 
     private Object buildInMake (ChannelMakeDeclarationNode node) {
