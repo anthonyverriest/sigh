@@ -435,6 +435,8 @@ public final class Interpreter
 
     /* VIBE */
     private Void channelIn(ChannelInStatementNode node){
+        Object channel = visitor.apply(node.channel);
+        Object message = visitor.apply(node.value);
         //((Channel<?>) channel).send(message); undo comment afetr receive implementation
         return null;
     }
