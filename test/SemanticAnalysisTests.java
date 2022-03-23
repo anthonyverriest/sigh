@@ -316,6 +316,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat)");
 
         // Edge cases
+        failureInputWith("var x : Int = 6 + make(ChanInt)",
+            "Could not resolve: make");
+
         failureInputWith("var x : Int = make(ChanInt)",
             "expected Int but got ChanInt");
         failureInputWith("var x : String = make(ChanString)",
@@ -350,6 +353,16 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "invalid type passed to function close");
         failureInputWith("var x : String = \"hey\" ; close(x)",
             "invalid type passed to function close");
+    }
+
+    @Test public void testSend(){
+        /* VIBE */
+        successInput("var x : ChanString = make(ChanString) ; x <- \"hello\" ; close(x)");
+        successInput("var x : ChanInt = make(ChanInt) ; x <- 4 ; close(x)");
+        successInput("var x : ChanFloat = make(ChanFloat) ; x <- 9.0 ; close(x)");
+
+        failureInputWith("var x : ChanString = make(ChanString) ; x <- 4 ; close(x)",
+            "invalid type passed to channel : ChanString <- Int");
     }
 
     // ---------------------------------------------------------------------------------------------

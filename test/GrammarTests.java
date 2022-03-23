@@ -115,6 +115,9 @@ public class GrammarTests extends AutumnTestFixture {
 
         /* VIBE */
         successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"))));
+
+        failure("var x: ChanInt = make(ChanInt) + 3");
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -147,10 +150,18 @@ public class GrammarTests extends AutumnTestFixture {
 
         /* VIBE */
         successExpect("close(x)", new ChannelCloseStatementNode(null, new ReferenceNode(null, "x")));
+    }
+
+    @Test public void testSend(){
+        rule = grammar.statement;
 
         successExpect("fizz <- 4", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), intlit(4)));
         successExpect("fizz <- \"hey\"", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), stringLit("hey")));
         successExpect("fizz <- 9.0", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), floatlit(9.0)));
+
+        failure("fizz <- 3 + 5");
+        failure("fizz <- \"hey\" + 5");
+        failure("fizz <- buzz <- 4");
     }
 
     // ---------------------------------------------------------------------------------------------
