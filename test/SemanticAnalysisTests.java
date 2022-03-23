@@ -319,6 +319,13 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         failureInputWith("var x : Int = 6 + make(ChanInt)",
             "Could not resolve: make");
 
+        failureInputWith("var x : Int = make(Int)",
+            "invalid type passed to function make");
+        failureInputWith("var x : String = make(String)",
+            "invalid type passed to function make");
+        failureInputWith("var x : Float = make(Float)",
+            "invalid type passed to function make");
+
         failureInputWith("var x : Int = make(ChanInt)",
             "expected Int but got ChanInt");
         failureInputWith("var x : String = make(ChanString)",
