@@ -117,7 +117,7 @@ public class GrammarTests extends AutumnTestFixture {
         successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"))));
 
         failure("var x: ChanInt = make(ChanInt) + 3");
-
+        failure("var x : ChanInt[] = make(chanInt[])");
     }
 
     // ---------------------------------------------------------------------------------------------
