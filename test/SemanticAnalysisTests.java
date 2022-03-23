@@ -353,4 +353,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test public void testReceive(){
+        /* VIBE */
+        successInput("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x ; close(x)");
+
+        failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: String = <-x ; close(x)", "expected String but got Int");
+    }
 }

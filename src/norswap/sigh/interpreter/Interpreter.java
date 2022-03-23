@@ -439,7 +439,11 @@ public final class Interpreter
     /* VIBE */
     private Object channelOut(ChannelOutAssignmentNode node){
         Object channel = visitor.apply(node.channel);
-        return ((Channel<?>) channel).receive();
+        try {
+            return ((Channel<?>) channel).receive();
+        } catch (BrokenChannel | NullPointerException | ClassCastException e) {
+            throw new PassthroughException(new BrokenChannel());
+        }
     }
 
     private Void channelIn(ChannelInStatementNode node){

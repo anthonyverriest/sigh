@@ -379,5 +379,17 @@ public final class InterpreterTests extends TestFixture {
         checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; x <- 4", BrokenChannel.class);
     }
 
+    @Test public void testReceive(){
+        check("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x ; return z == 4", true);
+
+        check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; var z: Float = <-x ; return z", 10.0);
+
+        Channel<String> s = new Channel<>();
+        s.send("hello");
+        check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; var z: String = <-x ; return z", s.receive());
+
+        checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; var z: Int = <-x", BrokenChannel.class);
+    }
+
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }

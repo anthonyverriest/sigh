@@ -27,9 +27,6 @@ public class GrammarTests extends AutumnTestFixture {
         return new StringLiteralNode(null, s);
     }
 
-    /* VIBE */
-
-
     // ---------------------------------------------------------------------------------------------
 
     @Test
@@ -118,7 +115,6 @@ public class GrammarTests extends AutumnTestFixture {
 
         /* VIBE */
         successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"))));
-
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -158,4 +154,15 @@ public class GrammarTests extends AutumnTestFixture {
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test public void testReceive(){
+        /* VIBE */
+        rule = grammar.statement;
+
+        successExpect("var x: Int = <-fizz", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "Int"), new ChannelOutAssignmentNode(null, new ReferenceNode(null, "fizz"))));
+        successExpect("x = <-fizz", new ExpressionStatementNode(null, new AssignmentNode(null, new ReferenceNode(null, "x"), new ChannelOutAssignmentNode(null, new ReferenceNode(null, "fizz")))));
+
+        failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = 5 + <-x ; close(x)");
+        failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x - 9 ; close(x)");
+    }
 }
