@@ -15,6 +15,6 @@ public class ChannelInStatementNode extends StatementNode{
     }
 
     @Override public String contents () {
-        return "channel in statement";
+        return channel + " <- " + value;
     }
 }

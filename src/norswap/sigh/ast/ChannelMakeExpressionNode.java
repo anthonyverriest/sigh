@@ -16,7 +16,7 @@ public class ChannelMakeExpressionNode extends ExpressionNode
     }
 
     @Override public String contents () {
-        return "make " + type;
+        return "make(" + type + ")";
     }
 
 }

@@ -18,7 +18,7 @@ public class ChannelCloseStatementNode extends StatementNode
     }
 
     @Override public String contents () {
-        return "close " + channel;
+        return "close(" + channel + ")";
     }
 
 }

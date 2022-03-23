@@ -1,6 +1,8 @@
 package norswap.sigh.interpreter;
 
 import norswap.sigh.ast.*;
+import norswap.sigh.interpreter.channel.BadChannelDescriptor;
+import norswap.sigh.interpreter.channel.BrokenChannel;
 import norswap.sigh.interpreter.channel.Channel;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
@@ -442,14 +444,22 @@ public final class Interpreter
 
     private Void channelIn(ChannelInStatementNode node){
         Object channel = visitor.apply(node.channel);
-        Object message = visitor.apply(node.value);
-        ((Channel<?>) channel).send(message);
+        Object value = visitor.apply(node.value);
+        try {
+            ((Channel<?>) channel).send(value);
+        } catch (BrokenChannel | NullPointerException | ClassCastException e) {
+            throw new PassthroughException(new BrokenChannel());
+        }
         return null;
     }
 
     private Void buildInClose(ChannelCloseStatementNode node){
         Object channel = visitor.apply(node.channel);
-        ((Channel<?>) channel).close();
+        try {
+            ((Channel<?>) channel).close();
+        } catch (BadChannelDescriptor | NullPointerException | ClassCastException e) {
+            throw new PassthroughException(new BadChannelDescriptor());
+        }
         return null;
     }
 

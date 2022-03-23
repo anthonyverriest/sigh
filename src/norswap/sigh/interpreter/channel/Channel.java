@@ -1,5 +1,6 @@
 package norswap.sigh.interpreter.channel;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -12,13 +13,13 @@ public class Channel<T> {
         this.isOpen = true;
     }
 
-    public void send(Object message) {
+    public void send(Object value) throws BrokenChannel {
         @SuppressWarnings("unchecked")
-        T msg = (T) message;
+        T val = (T) value;
 
         if(isOpen()){
             try{
-                this.queue.put(msg);
+                this.queue.put(val);
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -42,7 +43,9 @@ public class Channel<T> {
         return isOpen;
     }
 
-    public void close(){
+    public void close() throws BadChannelDescriptor {
+        if(!isOpen())
+            throw  new BadChannelDescriptor();
         queue.clear();
         queue = null;
         isOpen = false;
@@ -53,11 +56,11 @@ public class Channel<T> {
         if (this == o) return true;
         if (!(o instanceof Channel)) return false;
         Channel<?> channel = (Channel<?>) o;
-        return isOpen == channel.isOpen && Objects.equals(queue, channel.queue);
+        return hashCode() == channel.hashCode();
     }
 
     @Override
     public int hashCode () {
-        return Objects.hash(queue, isOpen);
+        return Objects.hash(Arrays.hashCode(queue.toArray()), isOpen);
     }
 }

@@ -23,6 +23,10 @@ public class GrammarTests extends AutumnTestFixture {
         return new FloatLiteralNode(null, d);
     }
 
+    private static StringLiteralNode stringLit (String s) {
+        return new StringLiteralNode(null, s);
+    }
+
     /* VIBE */
 
 
@@ -113,13 +117,8 @@ public class GrammarTests extends AutumnTestFixture {
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
 
         /* VIBE */
-        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null,
-            "x", new SimpleTypeNode(null, "ChanInt"), new ExpressionNode(null) {
-            @Override
-            public String contents () {
-                return null;
-            }
-        }));
+        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"))));
+
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -148,6 +147,14 @@ public class GrammarTests extends AutumnTestFixture {
         successExpect("while 1 < 2 { return } ", new WhileNode(null,
             new BinaryExpressionNode(null, intlit(1), LOWER, intlit(2)),
             new BlockNode(null, asList(new ReturnNode(null, null)))));
+
+
+        /* VIBE */
+        successExpect("close(x)", new ChannelCloseStatementNode(null, new ReferenceNode(null, "x")));
+
+        successExpect("fizz <- 4", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), intlit(4)));
+        successExpect("fizz <- \"hey\"", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), stringLit("hey")));
+        successExpect("fizz <- 9.0", new ChannelInStatementNode(null, new ReferenceNode(null, "fizz"), floatlit(9.0)));
     }
 
     // ---------------------------------------------------------------------------------------------
