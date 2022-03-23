@@ -305,6 +305,7 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "Missing return in function");
     }
 
+    /* VIBE */
     // ---------------------------------------------------------------------------------------------
 
     @Test public void testMake()
@@ -328,7 +329,27 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "expected ChanString but got String");
         failureInputWith("var x : ChanFloat = 0.0",
             "expected ChanFloat but got Float");
+    }
 
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void testClose()
+    {
+        /* VIBE */
+        successInput("var x : ChanString = make(ChanString) ; close(x)");
+        successInput("var x : ChanInt = make(ChanInt) ; close(x)");
+        successInput("var x : ChanFloat = make(ChanFloat) ; close(x)");
+
+        // Edge cases
+        failureInputWith("close(8.0)",
+            "Could not resolve: close");
+
+        failureInputWith("var x : Int = 3 ; close(x)",
+            "invalid type passed to function close");
+        failureInputWith("var x : Float = 3.0 ; close(x)",
+            "invalid type passed to function close");
+        failureInputWith("var x : String = \"hey\" ; close(x)",
+            "invalid type passed to function close");
     }
 
     // ---------------------------------------------------------------------------------------------

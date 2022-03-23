@@ -6,6 +6,8 @@ import norswap.autumn.positions.LineMapString;
 import norswap.sigh.SemanticAnalysis;
 import norswap.sigh.SighGrammar;
 import norswap.sigh.ast.SighNode;
+import norswap.sigh.interpreter.channel.BadChannelDescriptor;
+import norswap.sigh.interpreter.channel.BrokenChannel;
 import norswap.sigh.interpreter.channel.Channel;
 import norswap.sigh.interpreter.Interpreter;
 import norswap.sigh.interpreter.Null;
@@ -355,6 +357,27 @@ public final class InterpreterTests extends TestFixture {
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test public void testClose(){
+        checkThrows("var x: ChanInt = make(ChanInt) ; close(x) ; var z: Int = 3 ; close(x)", BadChannelDescriptor.class);
+        checkThrows("var x: ChanInt = null ; close(x)", BadChannelDescriptor.class);
+    }
+
+    @Test public void testSend(){
+        Channel<Integer> i = new Channel<>();
+        i.send(4);
+        check("var x : ChanInt = make(ChanInt) ; x <- 4 ; return x", i);
+
+        Channel<Float> f = new Channel<>();
+        f.send(10.0);
+        check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; return x", f);
+
+        Channel<String> s = new Channel<>();
+        s.send("hello");
+        check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; return x", s);
+
+        checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; x <- 4", BrokenChannel.class);
+    }
 
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }

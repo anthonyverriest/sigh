@@ -1,18 +1,17 @@
 fun main (args: String) {
     var fizz: ChanString = make(ChanString) //create a channel of type String
     var buzz: ChanString = make(ChanString)
-    var lop: ChanString = null
     var i: Int = 0
     while i <= 50 {
         if i % 5 == 0 && i % 7 == 0 {
             print("fizzbuzz")
         }
         else if i % 5 == 0 {
-            fizz <- "fizz" //send value to channel
+            //fizz <- "fizz" //send value to channel
             print("33")
         }
         else if i % 7 == 0 {
-            buzz <- "buzz"
+            //buzz <- "buzz"
             print("33")
         }
         else {
