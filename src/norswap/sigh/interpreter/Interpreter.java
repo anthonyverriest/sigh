@@ -4,6 +4,7 @@ import norswap.sigh.ast.*;
 import norswap.sigh.interpreter.channel.BadChannelDescriptor;
 import norswap.sigh.interpreter.channel.BrokenChannel;
 import norswap.sigh.interpreter.channel.Channel;
+import norswap.sigh.interpreter.channel.Routine;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
@@ -93,6 +94,8 @@ public final class Interpreter
         visitor.register(ChannelInStatementNode.class , this::channelIn);
         visitor.register(ChannelOutAssignmentNode.class , this::channelOut);
 
+        visitor.register(RoutineFunCallNode.class , this::routine);
+
 
         visitor.registerFallback(node -> null);
     }
@@ -104,6 +107,8 @@ public final class Interpreter
             return run(root);
         } catch (PassthroughException e) {
             throw Exceptions.runtime(e.getCause());
+        } finally {
+            Routine.shutdown();
         }
     }
 
@@ -402,7 +407,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object funCall (FunCallNode node)
+    private synchronized Object funCall (FunCallNode node)
     {
         Object decl = get(node.function);
         node.arguments.forEach(this::run);
@@ -417,14 +422,13 @@ public final class Interpreter
         if (decl instanceof Constructor)
             return buildStruct(((Constructor) decl).declaration, args);
 
-
         ScopeStorage oldStorage = storage;
         Scope scope = reactor.get(decl, "scope");
         storage = new ScopeStorage(scope, storage);
 
         FunDeclarationNode funDecl = (FunDeclarationNode) decl;
         coIterate(args, funDecl.parameters,
-                (arg, param) -> storage.set(scope, param.name, arg));
+            (arg, param) -> storage.set(scope, param.name, arg));
 
         try {
             get(funDecl.block);
@@ -437,6 +441,14 @@ public final class Interpreter
     }
 
     /* VIBE */
+    private Void routine(RoutineFunCallNode node){
+        //void for now
+       Routine.routine(() -> {
+           get(node.function);
+        });
+        return null;
+    }
+
     private Object channelOut(ChannelOutAssignmentNode node){
         Object channel = visitor.apply(node.channel);
         try {
@@ -547,7 +559,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private Object reference (ReferenceNode node)
+    private synchronized Object reference (ReferenceNode node)
     {
         Scope scope = reactor.get(node, "scope");
         DeclarationNode decl = reactor.get(node, "decl");
@@ -571,7 +583,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private Void varDecl (VarDeclarationNode node)
+    private synchronized Void varDecl (VarDeclarationNode node)
     {
         Scope scope = reactor.get(node, "scope");
         assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
@@ -580,7 +592,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private void assign (Scope scope, String name, Object value, Type targetType)
+    private synchronized void assign (Scope scope, String name, Object value, Type targetType)
     {
         if (value instanceof Long && targetType instanceof FloatType)
             value = ((Long) value).doubleValue();

@@ -35,7 +35,7 @@ public final class ScopeStorage
      * Returns the value with the given name, defined in the given scope (determined by semantic
      * analysis), which should be this scope or one of its ancestors.
      */
-    Object get (Scope scope, String name)
+    synchronized Object get (Scope scope, String name)
     {
         if (scope == this.scope)
             return values.get(name);
@@ -51,7 +51,7 @@ public final class ScopeStorage
      * Sets the value with the given name, defined in the given scope (determined by semantic
      * analysis), which should be this scope or one of its ancestors.
      */
-    void set (Scope scope, String name, Object value)
+    synchronized void set (Scope scope, String name, Object value)
     {
         if (scope == this.scope)
             values.put(name, value);

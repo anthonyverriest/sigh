@@ -56,6 +56,7 @@ public class SighGrammar extends Grammar
     public rule ARROW = word("<-");
     public rule _make = word("make");
     public rule _close= word("close");
+    public rule _routine = word("routine");
 
     public rule _var            = reserved("var");
     public rule _fun            = reserved("fun");
@@ -212,6 +213,8 @@ public class SighGrammar extends Grammar
     public rule channel_in_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelInStatementNode($.span(), $.$[0], $.$[1]));
 
 
+    public rule routine_stmt = seq(_routine, reference, function_args).push($ -> new RoutineFunCallNode($.span(), new FunCallNode($.span(), $.$[0], $.$[1])));
+
 
 
 
@@ -236,6 +239,7 @@ public class SighGrammar extends Grammar
     public rule statement = lazy(() -> choice(
         this.block,
         this.close_stmt, // VIBE
+        this.routine_stmt,
         this.var_decl,
         this.fun_decl,
         this.struct_decl,

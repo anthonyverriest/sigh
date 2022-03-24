@@ -129,6 +129,8 @@ public final class SemanticAnalysis
         walker.register(ChannelInStatementNode.class,           PRE_VISIT,  analysis::channelIn);
         walker.register(ChannelOutAssignmentNode.class,           PRE_VISIT,  analysis::channelOut);
 
+        walker.register(RoutineFunCallNode.class,           PRE_VISIT,  analysis::routine);
+
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
         walker.register(ArrayTypeNode.class,            PRE_VISIT,  analysis::arrayType);
@@ -594,6 +596,10 @@ public final class SemanticAnalysis
     }
 
     /* VIBE */
+    private void routine(RoutineFunCallNode node){
+
+    }
+
     private void channelOut(ChannelOutAssignmentNode node){
         R.rule(node, "type")
             .using(node.channel, "type")
