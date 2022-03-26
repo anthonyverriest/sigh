@@ -1,5 +1,6 @@
 package norswap.sigh.interpreter;
 
+import norswap.sigh.SemanticAnalysis;
 import norswap.sigh.ast.*;
 import norswap.sigh.interpreter.channel.BadChannelDescriptor;
 import norswap.sigh.interpreter.channel.BrokenChannel;
@@ -15,6 +16,7 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
+import norswap.utils.visitors.Walker;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,12 +48,12 @@ import static norswap.utils.Vanilla.map;
  *     <li>Types: the corresponding {@link StructDeclarationNode}</li>
  * </ul>
  */
-public final class Interpreter
+public final class Interpreter implements Cloneable
 {
     // ---------------------------------------------------------------------------------------------
 
     private final ValuedVisitor<SighNode, Object> visitor = new ValuedVisitor<>();
-    private final Reactor reactor;
+    private Reactor reactor;
     private ScopeStorage storage = null;
     private RootScope rootScope;
     private ScopeStorage rootStorage;
@@ -100,6 +102,42 @@ public final class Interpreter
         visitor.registerFallback(node -> null);
     }
 
+    public void setStorage (ScopeStorage storage) {
+        this.storage = storage;
+    }
+
+    public void setRootScope (RootScope rootScope) {
+        this.rootScope = rootScope;
+    }
+
+    public void setRootStorage (ScopeStorage rootStorage) {
+        this.rootStorage = rootStorage;
+    }
+
+    public void setReactor(Reactor reactor){
+        this.reactor = reactor;
+    }
+
+    @Override
+    protected Object clone () throws CloneNotSupportedException {
+        Reactor reactor = new Reactor();
+        Walker<SighNode> walker = SemanticAnalysis.createWalker(reactor);
+        reactor.run();
+
+        Interpreter i = (Interpreter) new Interpreter(this.reactor);
+        if (this.storage != null)
+            i.setStorage((ScopeStorage) this.storage.clone());
+        if (this.rootScope != null)
+            i.setRootScope(this.rootScope);
+        if (this.rootStorage != null)
+            i.setRootStorage((ScopeStorage) this.rootStorage.clone());
+
+
+
+        //i.setReactor(reactor);
+        return i;
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     public Object interpret (SighNode root) {
@@ -138,7 +176,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private <T> T get(SighNode node) {
+    private  <T> T get(SighNode node) {
         return cast(run(node));
     }
 
@@ -363,7 +401,7 @@ public final class Interpreter
             return r.value;
             // allow returning from the main script
         } finally {
-            storage = null;
+            //storage = null; //TODO service
         }
         return null;
     }
@@ -407,7 +445,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private synchronized Object funCall (FunCallNode node)
+    private Object funCall (FunCallNode node)
     {
         Object decl = get(node.function);
         node.arguments.forEach(this::run);
@@ -443,9 +481,49 @@ public final class Interpreter
     /* VIBE */
     private Void routine(RoutineFunCallNode node){
         //void for now
-       Routine.routine(() -> {
-           get(node.function);
-        });
+        //get(node.function);
+        Interpreter in = null;
+        try {
+            in = (Interpreter) this.clone();
+            //    in.get(node.function);
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+
+        Object decl = in.get(node.function.function);
+        node.function.arguments.forEach(in::run);
+        Object[] args = map(node.function.arguments, new Object[0], visitor);
+
+        if (decl == Null.INSTANCE)
+            throw new PassthroughException(new NullPointerException("calling a null function"));
+
+        ScopeStorage oldStorage = in.storage;
+        Scope scope = reactor.get(decl, "scope");
+        in.storage = new ScopeStorage(scope, in.storage);
+
+        FunDeclarationNode funDecl = (FunDeclarationNode) decl;
+        Interpreter finalIn = in;
+        coIterate(args, funDecl.parameters,
+            (arg, param) -> finalIn.storage.set(scope, param.name, arg));
+
+        try {
+
+
+            Interpreter finalIn1 = in;
+            Routine.routine(() -> {
+                finalIn1.get(funDecl.block);
+
+            });
+
+        } catch (Return r) {
+            // return r.value;
+        } finally {
+            //storage = oldStorage;
+        }
+
+
+
         return null;
     }
 
@@ -559,7 +637,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private synchronized Object reference (ReferenceNode node)
+    private Object reference (ReferenceNode node)
     {
         Scope scope = reactor.get(node, "scope");
         DeclarationNode decl = reactor.get(node, "decl");
@@ -583,7 +661,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private synchronized Void varDecl (VarDeclarationNode node)
+    private Void varDecl (VarDeclarationNode node)
     {
         Scope scope = reactor.get(node, "scope");
         assign(scope, node.name, get(node.initializer), reactor.get(node, "type"));
@@ -592,7 +670,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private synchronized void assign (Scope scope, String name, Object value, Type targetType)
+    private void assign (Scope scope, String name, Object value, Type targetType)
     {
         if (value instanceof Long && targetType instanceof FloatType)
             value = ((Long) value).doubleValue();

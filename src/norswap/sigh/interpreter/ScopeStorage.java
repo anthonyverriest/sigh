@@ -11,7 +11,7 @@ import java.util.HashMap;
  * at runtime (for instance, one for each function invocation), sometimes at the same type,
  * in the presence of recursion.
  */
-public final class ScopeStorage
+public final class ScopeStorage implements Cloneable
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -27,6 +27,12 @@ public final class ScopeStorage
     ScopeStorage (Scope scope, ScopeStorage parent) {
         this.scope = scope;
         this.parent = parent;
+    }
+
+    @Override
+    protected Object clone () throws CloneNotSupportedException {
+        ScopeStorage s = (ScopeStorage) super.clone();
+        return new ScopeStorage((Scope) scope.clone(), s);
     }
 
     // ---------------------------------------------------------------------------------------------

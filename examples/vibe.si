@@ -1,10 +1,11 @@
 fun send(chan: ChanString, msg: String){
+    print(msg)
     chan <- "hello" //TODO reference, this does deadlocks synchro, fix make ref scope
 }
 
-fun receive(chan: ChanString) {
+fun receive(chan: ChanString){
     var out: String = <-chan
-    print(out)
+    print("Member " + out + " has arrived")
 }
 
 fun main (args: String) {
@@ -12,27 +13,34 @@ fun main (args: String) {
     channel = make(ChanString) //create a channel of type String
     var i: Int = 0
 
-    while i <= 20 {
-        if i % 5 == 0 {
-            routine send(channel, "Naruto")
-            print("SEND")
+    while i <= 10 {
+        if i == 0 {
+            routine send(channel, "Sakura")
+            print("CALL SEND: " + i)
         }
-        else if i % 7 == 0 {
-            //routine receive(channel)
-            //routine receive(channel)
-            print("RECEIVE")
+        else if i == 3 {
+            routine send(channel, "Sasuke")
+            print("CALL SEND: " + i)
+        }
+        else if i == 5 {
+            routine send(channel, "Naruto")
+            print("CALL SEND: " + i)
+        }
+        else if i == 7 {
+            routine receive(channel)
+            print("CALL RECEIVE: " + i)
         }
         else {
             print(i + "")
         }
         i = i + 1
     }
-    routine receive(channel)
-    routine receive(channel)
-    routine receive(channel)
-    routine receive(channel)
-    routine receive(channel)
-    //close(channel) //close channel careful with routines
+    print("Kakashi arrived and waiting for the rest of the team ...")
+    receive(channel)
+    receive(channel)
+    print("Team complete, Mission: Rescue Gaara")
+
+    close(channel) //close channel careful with routines
 }
 
 main("")
