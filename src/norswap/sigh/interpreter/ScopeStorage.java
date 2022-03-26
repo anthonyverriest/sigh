@@ -11,7 +11,7 @@ import java.util.HashMap;
  * at runtime (for instance, one for each function invocation), sometimes at the same type,
  * in the presence of recursion.
  */
-public final class ScopeStorage implements Cloneable
+public final class ScopeStorage
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -29,19 +29,13 @@ public final class ScopeStorage implements Cloneable
         this.parent = parent;
     }
 
-    @Override
-    protected Object clone () throws CloneNotSupportedException {
-        ScopeStorage s = (ScopeStorage) super.clone();
-        return new ScopeStorage((Scope) scope.clone(), s);
-    }
-
     // ---------------------------------------------------------------------------------------------
 
     /**
      * Returns the value with the given name, defined in the given scope (determined by semantic
      * analysis), which should be this scope or one of its ancestors.
      */
-    synchronized Object get (Scope scope, String name)
+    Object get (Scope scope, String name)
     {
         if (scope == this.scope)
             return values.get(name);
@@ -57,7 +51,7 @@ public final class ScopeStorage implements Cloneable
      * Sets the value with the given name, defined in the given scope (determined by semantic
      * analysis), which should be this scope or one of its ancestors.
      */
-    synchronized void set (Scope scope, String name, Object value)
+    void set (Scope scope, String name, Object value)
     {
         if (scope == this.scope)
             values.put(name, value);

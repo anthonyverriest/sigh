@@ -48,12 +48,12 @@ import static norswap.utils.Vanilla.map;
  *     <li>Types: the corresponding {@link StructDeclarationNode}</li>
  * </ul>
  */
-public final class Interpreter implements Cloneable
+public final class Interpreter
 {
     // ---------------------------------------------------------------------------------------------
 
     private final ValuedVisitor<SighNode, Object> visitor = new ValuedVisitor<>();
-    private Reactor reactor;
+    private final Reactor reactor;
     private ScopeStorage storage = null;
     private RootScope rootScope;
     private ScopeStorage rootStorage;
@@ -114,27 +114,14 @@ public final class Interpreter implements Cloneable
         this.rootStorage = rootStorage;
     }
 
-    public void setReactor(Reactor reactor){
-        this.reactor = reactor;
-    }
-
-    @Override
-    protected Object clone () throws CloneNotSupportedException {
-        Reactor reactor = new Reactor();
-        Walker<SighNode> walker = SemanticAnalysis.createWalker(reactor);
-        reactor.run();
-
-        Interpreter i = (Interpreter) new Interpreter(this.reactor);
+    protected Interpreter clone ()  {
+        Interpreter i = new Interpreter(this.reactor);
         if (this.storage != null)
-            i.setStorage((ScopeStorage) this.storage.clone());
+            i.setStorage(this.storage);
         if (this.rootScope != null)
             i.setRootScope(this.rootScope);
         if (this.rootStorage != null)
-            i.setRootStorage((ScopeStorage) this.rootStorage.clone());
-
-
-
-        //i.setReactor(reactor);
+            i.setRootStorage(this.rootStorage);
         return i;
     }
 
@@ -147,6 +134,7 @@ public final class Interpreter implements Cloneable
             throw Exceptions.runtime(e.getCause());
         } finally {
             Routine.shutdown();
+            storage = null;
         }
     }
 
@@ -400,8 +388,6 @@ public final class Interpreter implements Cloneable
         } catch (Return r) {
             return r.value;
             // allow returning from the main script
-        } finally {
-            //storage = null; //TODO service
         }
         return null;
     }
@@ -480,49 +466,26 @@ public final class Interpreter implements Cloneable
 
     /* VIBE */
     private Void routine(RoutineFunCallNode node){
-        //void for now
-        //get(node.function);
-        Interpreter in = null;
-        try {
-            in = (Interpreter) this.clone();
-            //    in.get(node.function);
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+        //Only void functions for now
 
+        Interpreter new_interpreter = this.clone();
 
-        Object decl = in.get(node.function.function);
-        node.function.arguments.forEach(in::run);
+        Object decl = new_interpreter.get(node.function.function);
+        node.function.arguments.forEach(new_interpreter::run);
         Object[] args = map(node.function.arguments, new Object[0], visitor);
 
         if (decl == Null.INSTANCE)
             throw new PassthroughException(new NullPointerException("calling a null function"));
 
-        ScopeStorage oldStorage = in.storage;
+        ScopeStorage oldStorage = new_interpreter.storage;
         Scope scope = reactor.get(decl, "scope");
-        in.storage = new ScopeStorage(scope, in.storage);
+        new_interpreter.storage = new ScopeStorage(scope, new_interpreter.storage);
 
         FunDeclarationNode funDecl = (FunDeclarationNode) decl;
-        Interpreter finalIn = in;
         coIterate(args, funDecl.parameters,
-            (arg, param) -> finalIn.storage.set(scope, param.name, arg));
+            (arg, param) -> new_interpreter.storage.set(scope, param.name, arg));
 
-        try {
-
-
-            Interpreter finalIn1 = in;
-            Routine.routine(() -> {
-                finalIn1.get(funDecl.block);
-
-            });
-
-        } catch (Return r) {
-            // return r.value;
-        } finally {
-            //storage = oldStorage;
-        }
-
-
+        Routine.routine(() -> new_interpreter.get(funDecl.block));
 
         return null;
     }

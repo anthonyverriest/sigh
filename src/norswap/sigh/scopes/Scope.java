@@ -7,7 +7,7 @@ import java.util.HashMap;
 /**
  * Represent a lexical scope in which declarations occurs.
  */
-public class Scope implements Cloneable
+public class Scope
 {
     // ---------------------------------------------------------------------------------------------
 
@@ -24,12 +24,6 @@ public class Scope implements Cloneable
     // ---------------------------------------------------------------------------------------------
 
     private final HashMap<String, DeclarationNode> declarations = new HashMap<>();
-
-    @Override
-    public Object clone () throws CloneNotSupportedException {
-        Scope s = (Scope) super.clone();
-        return new Scope(this.node, s);
-    }
 
     // ---------------------------------------------------------------------------------------------
 
