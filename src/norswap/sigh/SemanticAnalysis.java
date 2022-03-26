@@ -597,7 +597,18 @@ public final class SemanticAnalysis
 
     /* VIBE */
     private void routine(RoutineFunCallNode node){
+        R.rule(node, "type")
+            .using(node.function.function, "type")
+            .by(r -> {
+                Type type = r.get(0);
 
+                FunType funType = cast(type);
+
+                if (!(funType.returnType instanceof VoidType))
+                     r.error("routine only support void functions", node);
+                else
+                    r.set(0, funType.returnType);
+            });
     }
 
     private void channelOut(ChannelOutAssignmentNode node){

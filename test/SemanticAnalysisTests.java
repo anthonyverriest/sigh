@@ -380,4 +380,12 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
 
         failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: String = <-x ; close(x)", "expected String but got Int");
     }
+
+    @Test public void testRoutine(){
+        /* VIBE */
+        successInput("fun f(): Void { print(\"void\") } ; routine f()");
+        successInput("fun f(msg: String) { print(\"void\") } ; routine f(\"arg\")");
+
+        failureInputWith("fun f(): Int { return 1 } ; routine f()", "routine only support void functions");
+    }
 }

@@ -391,5 +391,12 @@ public final class InterpreterTests extends TestFixture {
         checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; var z: Int = <-x", BrokenChannel.class);
     }
 
+    @Test public void testRoutine(){
+        // !!!!!!!!!!
+        // To run these tests you must comment the shutdown of the threadpool in the interpreter (interpret function)
+        // !!!!!!!!!!
+        //check("fun f(chan: ChanFloat): Void { chan <- 3.0 } ; var chan: ChanFloat = make(ChanFloat) ; routine f(chan) ; var out: Float = <-chan; return out ", 3.0);
+    }
+
     // NOTE(norswap): Not incredibly complete, but should cover the basics.
 }

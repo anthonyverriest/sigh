@@ -176,4 +176,16 @@ public class GrammarTests extends AutumnTestFixture {
         failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = 5 + <-x ; close(x)");
         failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x - 9 ; close(x)");
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void testRoutine(){
+        /* VIBE */
+        rule = grammar.statement;
+
+        successExpect("routine f(1)", new RoutineFunCallNode(null, new FunCallNode(null, new ReferenceNode(null, "f"), asList(intlit(1)))));
+
+        failure("var x: Int = routine f(1)");
+        failure("routine f");
+    }
 }
