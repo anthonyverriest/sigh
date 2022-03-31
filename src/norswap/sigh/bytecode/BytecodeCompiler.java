@@ -25,6 +25,7 @@ import static norswap.sigh.bytecode.AsmUtils.*;
 import static norswap.sigh.bytecode.TypeUtils.fieldDescriptor;
 import static norswap.sigh.bytecode.TypeUtils.methodDescriptor;
 import static norswap.sigh.bytecode.TypeUtils.*;
+import static norswap.utils.visitors.WalkVisitType.PRE_VISIT;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
@@ -99,6 +100,11 @@ public class BytecodeCompiler
         visitor.register(UnaryExpressionNode.class,      this::unaryExpression);
         visitor.register(BinaryExpressionNode.class,     this::binaryExpression);
         visitor.register(AssignmentNode.class,           this::assignment);
+
+        /* VIBE */
+        visitor.register(ChannelMakeExpressionNode.class,           this::channelMake);
+        visitor.register(ChannelCloseStatementNode.class,           this::channelClose);
+        visitor.register(ChannelInStatementNode.class,           this::channelIn);
 
         // statement groups & declarations
         visitor.register(RootNode.class,                 this::root);
@@ -432,7 +438,16 @@ public class BytecodeCompiler
         } else if (type instanceof StructType) {
             // String.valueOf -> Object#toString (or override)
             invokeStatic(method, String.class, "valueOf", Object.class);
-        } else {
+        }  else if (type instanceof ChanStringType) {
+            invokeStatic(method, String.class, "valueOf", Object.class); // TODO
+        }
+        else if (type instanceof ChanFloatType) {
+            invokeStatic(method, String.class, "valueOf", Object.class); // TODO
+        }
+        else if (type instanceof ChanIntType) {
+            invokeStatic(method, String.class, "valueOf", Object.class); // TODO
+        }
+        else {
             throw new Error("unexpected type: " + type);
         }
     }
@@ -788,6 +803,19 @@ public class BytecodeCompiler
             method.visitFieldInsn(PUTFIELD, structBinaryName(structType), left.fieldName,
                 fieldDescriptor(fieldType));
         }
+        return null;
+    }
+
+    /*VIBE*/
+    private Object channelMake(ChannelMakeExpressionNode node){
+        return new Object();
+    }
+
+    private Object channelClose(ChannelCloseStatementNode node){
+        return null;
+    }
+
+    private Object channelIn(ChannelInStatementNode node){
         return null;
     }
 

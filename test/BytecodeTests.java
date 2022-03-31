@@ -7,6 +7,7 @@ import norswap.sigh.ast.SighNode;
 import norswap.sigh.bytecode.ByteArrayClassLoader;
 import norswap.sigh.bytecode.BytecodeCompiler;
 import norswap.sigh.bytecode.CompilationResult;
+import norswap.sigh.interpreter.channel.Channel;
 import norswap.uranium.Reactor;
 import norswap.utils.IO;
 import norswap.utils.visitors.Walker;
@@ -266,5 +267,10 @@ public class BytecodeTests
         check(makePair + "print(\"\" + x.x + \":\" + x.y)", "1:2.0");
         check(makePair + "x.x = 3; print(\"\" + x.x)", "3");
         check(makePair + "x.y = 3; print(\"\" + x.y)", "3.0");
+    }
+
+    /* VIBE */
+    @Test public void testMake(){
+        check("var x: ChanString = make(ChanString); print(\"\" + x)", "true"); //TODO var decl = null new Channel<String>()
     }
 }

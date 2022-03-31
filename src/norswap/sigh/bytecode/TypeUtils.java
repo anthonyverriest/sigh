@@ -50,6 +50,12 @@ public final class TypeUtils {
             throw new UnsupportedOperationException(); // TODO
         else if (type instanceof StructType)
             return Object.class; // the proper class type is not available at compile time
+        else if (type instanceof ChanStringType)
+            return Object.class;
+        else if (type instanceof ChanFloatType)
+            return Object.class;
+        else if (type instanceof ChanIntType)
+            return Object.class;
         else
             throw new Error("unreachable");
     }
@@ -85,6 +91,12 @@ public final class TypeUtils {
             throw new UnsupportedOperationException(); // TODO
         else if (type instanceof StructType)
             return Object[].class; // the proper class type is not available at compile time
+        /*else if (type instanceof ChanStringType)
+            return Object.class;
+        else if (type instanceof ChanFloatType)
+            return Object.class;
+        else if (type instanceof ChanIntType)
+            return Object.class;*/
         else
             throw new Error("unreachable");
     }
@@ -116,6 +128,12 @@ public final class TypeUtils {
             throw new UnsupportedOperationException(); // TODO
         else if (type instanceof StructType)
             return "L" + structBinaryName((StructType) type) + ";";
+        else if (type instanceof ChanStringType)
+            return "Lnorswap/sigh/types/ChantStringType;";
+        else if (type instanceof ChanFloatType)
+            return "Lnorswap/sigh/types/ChanFloatType;";
+        else if (type instanceof ChanIntType)
+            return "Lnorswap/sigh/types/ChanIntType;";
         else
             throw new Error("unreachable");
     }
