@@ -30,7 +30,7 @@ fun main (args: String) {
         }
         i = i + 1
     }
-    print("Kakashi arrived and waiting for the rest of the team ...")
+    print("Kakashi arrived and is waiting for the rest of the team ...")
     receive(channel)
     receive(channel)
     print("Team complete, Mission: Rescue Gaara")
