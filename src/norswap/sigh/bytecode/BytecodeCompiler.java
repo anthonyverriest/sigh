@@ -2,6 +2,7 @@ package norswap.sigh.bytecode;
 
 import norswap.sigh.ast.*;
 import norswap.sigh.interpreter.Constructor;
+import norswap.sigh.interpreter.channel.Channel;
 import norswap.sigh.scopes.Scope;
 import norswap.sigh.scopes.SyntheticDeclarationNode;
 import norswap.sigh.types.*;
@@ -733,6 +734,15 @@ public class BytecodeCompiler
                 case "Void":
                     method.visitLdcInsn(org.objectweb.asm.Type.getType(void.class));
                     break;
+                case "ChanString":
+                    method.visitLdcInsn(org.objectweb.asm.Type.getType(ChanStringType.class)); //TODO
+                    break;
+                case "ChanInt":
+                    method.visitLdcInsn(org.objectweb.asm.Type.getType(ChanIntType.class));
+                    break;
+                case "ChanFloat":
+                    method.visitLdcInsn(org.objectweb.asm.Type.getType(ChanFloatType.class));
+                    break;
                 case "Type":
                     method.visitLdcInsn(org.objectweb.asm.Type.getType(Class.class));
                     break;
@@ -808,7 +818,21 @@ public class BytecodeCompiler
 
     /*VIBE*/
     private Object channelMake(ChannelMakeExpressionNode node){
-        return new Object();
+
+        System.out.println("HEYY");
+        Object decl = reactor.get(node, "type");
+        //run(node);
+
+        if (decl instanceof ChanStringType){
+            return new Channel<String>();
+        }
+        if (decl instanceof ChanFloatType){
+            return new Channel<Float>();
+        }
+        if (decl instanceof ChanIntType){
+            return new Channel<Integer>();
+        }
+        return null;
     }
 
     private Object channelClose(ChannelCloseStatementNode node){
