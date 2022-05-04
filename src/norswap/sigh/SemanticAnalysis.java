@@ -89,6 +89,8 @@ public final class SemanticAnalysis
     /** Index of the current function argument. */
     private int argumentIndex;
 
+    private static int functionId = 0;
+
     // ---------------------------------------------------------------------------------------------
 
     private SemanticAnalysis(Reactor reactor) {
