@@ -223,9 +223,9 @@ public final class InterpreterTests extends TestFixture {
         check("var x: Float = 1; x = 2; return x", 2.0d);
 
         /* VIBE */
-        check("var x : ChanString = make(ChanString); return x", new Channel<String>());
-        check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>());
-        check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>());
+        check("var x : ChanString = make(ChanString); return x", new Channel<String>(1));
+        check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>(1));
+        check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>(1));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -364,15 +364,15 @@ public final class InterpreterTests extends TestFixture {
     }
 
     @Test public void testSend(){
-        Channel<Integer> i = new Channel<>();
+        Channel<Integer> i = new Channel<>(1);
         i.send(4);
         check("var x : ChanInt = make(ChanInt) ; x <- 4 ; return x", i);
 
-        Channel<Float> f = new Channel<>();
+        Channel<Float> f = new Channel<>(1);
         f.send(10.0);
         check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; return x", f);
 
-        Channel<String> s = new Channel<>();
+        Channel<String> s = new Channel<>(1);
         s.send("hello");
         check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; return x", s);
 
@@ -384,7 +384,7 @@ public final class InterpreterTests extends TestFixture {
 
         check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; var z: Float = <-x ; return z", 10.0);
 
-        Channel<String> s = new Channel<>();
+        Channel<String> s = new Channel<>(1);
         s.send("hello");
         check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; var z: String = <-x ; return z", s.receive());
 

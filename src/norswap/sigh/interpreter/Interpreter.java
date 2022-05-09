@@ -466,8 +466,6 @@ public final class Interpreter
 
     /* VIBE */
     private Void routine(RoutineFunCallNode node){
-        //Only void functions for now
-
         Interpreter new_interpreter = this.clone();
 
         Object decl = new_interpreter.get(node.function.function);
@@ -522,15 +520,16 @@ public final class Interpreter
 
     private Object buildInMake (ChannelMakeExpressionNode node) {
         Object decl = reactor.get(node, "type");
+        int buffer = ((Long)reactor.get(node, "buffer")).intValue();
 
         if (decl instanceof ChanStringType){
-            return new Channel<String>();
+            return new Channel<String>(buffer);
         }
         if (decl instanceof ChanFloatType){
-            return new Channel<Float>();
+            return new Channel<Float>(buffer);
         }
         if (decl instanceof ChanIntType){
-            return new Channel<Integer>();
+            return new Channel<Integer>(buffer);
         }
 
         return null;

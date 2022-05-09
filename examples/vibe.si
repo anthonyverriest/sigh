@@ -11,6 +11,10 @@ fun main (args: String) {
     var channel: ChanString = make(ChanString) //create a channel of type String
     var i: Int = 1
 
+    var x: ChanInt = make(ChanInt, 2)
+    x<-3
+    x<-4
+
     while i <= 10 {
         print(i + " ...")
         if i == 1 {
