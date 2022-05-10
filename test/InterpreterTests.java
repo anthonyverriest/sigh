@@ -226,6 +226,8 @@ public final class InterpreterTests extends TestFixture {
         check("var x : ChanString = make(ChanString); return x", new Channel<String>(1));
         check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>(1));
         check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>(1));
+
+        check("var x : ChanFloat = make(ChanFloat, 5); return x", new Channel<Float>(5));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -377,6 +379,13 @@ public final class InterpreterTests extends TestFixture {
         check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; return x", s);
 
         checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; x <- 4", BrokenChannel.class);
+
+
+        Channel<Integer> x = new Channel<>(3);
+        x.send(4);
+        x.send(2);
+        x.send(5);
+        check("var x : ChanInt = make(ChanInt, 3) ; x <- 4 ; x <- 2 ; x <- 5 ; return x", x);
     }
 
     @Test public void testReceive(){

@@ -661,36 +661,6 @@ public final class SemanticAnalysis
             R.set(node, "buffer", node.buffer.value);
         }
 
-/*
-       R.rule(node, "buffer")
-           .using(node.buffer.value, "val")
-            .by(r -> {
-
-                Object tmp = r.get(5);
-                r.error("only positive buffer size"+tmp, node);
-               r.copyFirst();
-
-
-                if (tmp == null){
-                    r.set(0, 1);
-                }else {
-
-                    try {
-                        int buffer = (int) tmp;
-
-                        if (buffer < 1) {
-                            r.error("only positive buffer size", node);
-                        } else {
-                            r.copyFirst();
-                        }
-                    }catch (Exception e){
-                        r.error("Only integer as buffer size", node);
-                    }
-                }
-
-            });
-
-*/
         R.rule(node, "type")
             .using(node.type, "value")
             .by(r -> {
@@ -701,8 +671,6 @@ public final class SemanticAnalysis
                 else
                     r.copyFirst();
             });
-
-
 
     }
 

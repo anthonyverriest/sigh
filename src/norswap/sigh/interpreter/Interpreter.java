@@ -475,7 +475,7 @@ public final class Interpreter
         if (decl == Null.INSTANCE)
             throw new PassthroughException(new NullPointerException("calling a null function"));
 
-        ScopeStorage oldStorage = new_interpreter.storage;
+        //ScopeStorage oldStorage = new_interpreter.storage;
         Scope scope = reactor.get(decl, "scope");
         new_interpreter.storage = new ScopeStorage(scope, new_interpreter.storage);
 

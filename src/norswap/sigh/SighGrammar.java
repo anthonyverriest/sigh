@@ -203,7 +203,6 @@ public class SighGrammar extends Grammar
     public rule close_stmt = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
     public rule buffered_make_decl = seq(_make, LPAREN, simple_type, seq(COMMA, integer).or_push_null(), RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0], $.$[1]));
-    //public rule make_decl = seq(_make, LPAREN, simple_type, RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0], new IntLiteralNode($.span(), 1)));
 
     public rule channel_out_expr = seq(ARROW, reference).push($ -> new ChannelOutAssignmentNode($.span(), $.$[0]));
 

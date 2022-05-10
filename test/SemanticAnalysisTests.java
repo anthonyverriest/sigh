@@ -320,8 +320,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat, 5)");
 
         failureInput("var x : ChanInt = make(ChanInt, 0)");
-        failureInput("var x : ChanString = make(ChanString, null)");
-        failureInput("var x : ChanFloat = make(ChanFloat, \"hello\")");
+        failureInput("var x : ChanString = make(ChanString, \"hello\")");
+        failureInput("var x : ChanFloat = make(ChanFloat, null)");
+
+        failureInput("var x : ChanFloat = make(ChanFloat, 5.0)");
+        failureInput("var x : ChanInt = make(ChanInt, -1)");
 
 
         // Edge cases
