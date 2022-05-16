@@ -605,7 +605,7 @@ public final class SemanticAnalysis
                 FunType funType = cast(type);
 
                 if (!(funType.returnType instanceof VoidType))
-                     r.error("routine only support void functions", node);
+                     r.error("routine only supports void functions", node);
                 else
                     r.set(0, funType.returnType);
             });
@@ -656,7 +656,7 @@ public final class SemanticAnalysis
     private void channelMake(ChannelMakeExpressionNode node){
 
         if (node.buffer.value < 1){
-            R.rule().by(r -> r.error("only positive value in buffer", node));
+            R.rule().by(r -> r.error("only positive integer in buffer", node));
         }else{
             R.set(node, "buffer", node.buffer.value);
         }

@@ -319,15 +319,14 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanString = make(ChanString, 1)");
         successInput("var x : ChanFloat = make(ChanFloat, 5)");
 
-        failureInput("var x : ChanInt = make(ChanInt, 0)");
         failureInput("var x : ChanString = make(ChanString, \"hello\")");
         failureInput("var x : ChanFloat = make(ChanFloat, null)");
-
         failureInput("var x : ChanFloat = make(ChanFloat, 5.0)");
-        failureInput("var x : ChanInt = make(ChanInt, -1)");
-
 
         // Edge cases
+        failureInputWith("var x : ChanInt = make(ChanInt, -1)", "only positive integer in buffer");
+        failureInputWith("var x : ChanInt = make(ChanInt, 0)", "only positive integer in buffer");
+
         failureInputWith("var x : Int = 6 + make(ChanInt)",
             "Could not resolve: make");
 
@@ -394,6 +393,8 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: Float = <-x ; close(x)");
         successInput("var x : ChanString = make(ChanString) ; x <- \"h\" ; var z: String = <-x ; close(x)");
 
+        failureInputWith("var x : ChanInt = make(ChanInt) ; var z: Int = 5 ; x <- 4 ; var w: Int = <-z ; close(x)", "invalid type: Int");
+
         failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: String = <-x ; close(x)", "expected String but got Int");
         failureInputWith("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: String = <-x ; close(x)", "expected String but got Float");
         failureInputWith("var x : ChanString = make(ChanString) ; x <- \"h\" ; var z: Int = <-x ; close(x)", "expected Int but got String");
@@ -404,6 +405,6 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("fun f(): Void { print(\"void\") } ; routine f()");
         successInput("fun f(msg: String) { print(\"void\") } ; routine f(\"arg\")");
 
-        failureInputWith("fun f(): Int { return 1 } ; routine f()", "routine only support void functions");
+        failureInputWith("fun f(): Int { return 1 } ; routine f()", "routine only supports void functions");
     }
 }
