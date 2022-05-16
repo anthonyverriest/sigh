@@ -1,0 +1,10 @@
+fun main(args: String){
+    var x: ChanInt = make(ChanInt, 2)
+
+    x <- 4
+    x <- 5
+
+    close(x)
+}
+
+main("")
