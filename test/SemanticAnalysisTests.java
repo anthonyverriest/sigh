@@ -363,8 +363,10 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat) ; close(x)");
 
         // Edge cases
-        failureInputWith("close(8.0)",
-            "Could not resolve: close");
+        failureInput("close(8.0)");
+        failureInput("close(null)");
+        failureInput("close(3)");
+        failureInput("close(\"h\")");
 
         failureInputWith("var x : Int = 3 ; close(x)",
             "invalid type passed to function close");
@@ -389,8 +391,12 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
     @Test public void testReceive(){
         /* VIBE */
         successInput("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x ; close(x)");
+        successInput("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: Float = <-x ; close(x)");
+        successInput("var x : ChanString = make(ChanString) ; x <- \"h\" ; var z: String = <-x ; close(x)");
 
         failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: String = <-x ; close(x)", "expected String but got Int");
+        failureInputWith("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: String = <-x ; close(x)", "expected String but got Float");
+        failureInputWith("var x : ChanString = make(ChanString) ; x <- \"h\" ; var z: Int = <-x ; close(x)", "expected Int but got String");
     }
 
     @Test public void testRoutine(){

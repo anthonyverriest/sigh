@@ -228,6 +228,8 @@ public final class InterpreterTests extends TestFixture {
         check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>(1));
 
         check("var x : ChanFloat = make(ChanFloat, 5); return x", new Channel<Float>(5));
+        check("var x : ChanInt = make(ChanInt, 5); return x", new Channel<Integer>(5));
+        check("var x : ChanString = make(ChanString, 5); return x", new Channel<String>(5));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -361,6 +363,15 @@ public final class InterpreterTests extends TestFixture {
     // ---------------------------------------------------------------------------------------------
 
     @Test public void testClose(){
+        Channel<Integer> i = new Channel<>(1);
+        i.close();
+        check("var x: ChanInt = make(ChanInt) ;  close(x) ; return x", i);
+
+        Channel<Integer> z = new Channel<>(1);
+        z.send(3);
+        z.close();
+        check("var x: ChanInt = make(ChanInt) ; x <- 3 ;  close(x) ; return x", z);
+
         checkThrows("var x: ChanInt = make(ChanInt) ; close(x) ; var z: Int = 3 ; close(x)", BadChannelDescriptor.class);
         checkThrows("var x: ChanInt = null ; close(x)", BadChannelDescriptor.class);
     }
@@ -396,6 +407,13 @@ public final class InterpreterTests extends TestFixture {
         Channel<String> s = new Channel<>(1);
         s.send("hello");
         check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; var z: String = <-x ; return z", s.receive());
+
+        Channel<Integer> x = new Channel<>(3);
+        x.send(4);
+        x.send(2);
+        x.receive();
+        x.send(5);
+        check("var x : ChanInt = make(ChanInt, 3) ; x <- 4 ; x <- 2 ; var out: Int = <-x;  x <- 5 ; return x", x);
 
         checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; var z: Int = <-x", BrokenChannel.class);
     }

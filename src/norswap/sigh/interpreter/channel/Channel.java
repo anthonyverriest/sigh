@@ -48,7 +48,6 @@ public class Channel<T> {
     public void close() throws BadChannelDescriptor {
         if(!isOpen())
             throw  new BadChannelDescriptor();
-        queue.clear();
         queue = null;
         isOpen = false;
     }
@@ -63,6 +62,6 @@ public class Channel<T> {
 
     @Override
     public int hashCode () {
-        return Objects.hash(Arrays.hashCode(queue.toArray()), isOpen, buffer);
+        return (queue == null) ? Objects.hash(isOpen, buffer) : Objects.hash(Arrays.hashCode(queue.toArray()), isOpen, buffer);
     }
 }
