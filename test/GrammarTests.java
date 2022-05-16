@@ -114,8 +114,8 @@ public class GrammarTests extends AutumnTestFixture {
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
 
         /* VIBE */
-        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), null)));
-        successExpect("var x: ChanInt = make(ChanInt, 3)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), 3)));
+        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), new IntLiteralNode(null, 1))));
+        successExpect("var x: ChanInt = make(ChanInt, 3)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), new IntLiteralNode(null, 3))));
 
 
         failure("var x: ChanInt = make(ChanInt) + 3");
