@@ -597,6 +597,7 @@ public final class SemanticAnalysis
 
     /* VIBE */
     private void routine(RoutineFunCallNode node){
+        //check if function sent to routine is void type
         R.rule(node, "type")
             .using(node.function.function, "type")
             .by(r -> {
@@ -612,6 +613,7 @@ public final class SemanticAnalysis
     }
 
     private void channelOut(ChannelOutAssignmentNode node){
+        //check that left hand side is same type as channel value type
         R.rule(node, "type")
             .using(node.channel, "type")
             .by(r -> {
@@ -629,6 +631,7 @@ public final class SemanticAnalysis
     }
 
     private void channelIn(ChannelInStatementNode node){
+        //check that right hand side is a channel and left hand side is same typz as right hand side value
         R.rule(node, "value")
             .using(node.value.attr("type"), node.channel.attr("type"))
             .by(r -> {
@@ -642,6 +645,7 @@ public final class SemanticAnalysis
     }
 
     private void channelClose(ChannelCloseStatementNode node){
+        //check that only channels are passed as argument
         R.rule(node, "value")
             .using(node.channel, "type")
             .by(r -> {
@@ -654,7 +658,7 @@ public final class SemanticAnalysis
     }
 
     private void channelMake(ChannelMakeExpressionNode node){
-
+        //check buffer size and only valid channel types for make function
         if (node.buffer.value < 1){
             R.rule().by(r -> r.error("only positive integer in buffer", node));
         }else{

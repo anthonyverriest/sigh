@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Routine {
+    //thread pool to run routines
     static final ExecutorService routinesExecutor = Executors.newCachedThreadPool();
 
     public static void routine(Runnable routine) {

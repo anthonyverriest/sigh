@@ -133,7 +133,7 @@ public final class Interpreter
         } catch (PassthroughException e) {
             throw Exceptions.runtime(e.getCause());
         } finally {
-            Routine.shutdown();
+            Routine.shutdown(); //Vibe free pool
             storage = null;
         }
     }
@@ -466,6 +466,7 @@ public final class Interpreter
 
     /* VIBE */
     private Void routine(RoutineFunCallNode node){
+        //make a new interpreter with a storage ref and run the function block async
         Interpreter new_interpreter = this.clone();
 
         Object decl = new_interpreter.get(node.function.function);
@@ -475,7 +476,6 @@ public final class Interpreter
         if (decl == Null.INSTANCE)
             throw new PassthroughException(new NullPointerException("calling a null function"));
 
-        //ScopeStorage oldStorage = new_interpreter.storage;
         Scope scope = reactor.get(decl, "scope");
         new_interpreter.storage = new ScopeStorage(scope, new_interpreter.storage);
 
