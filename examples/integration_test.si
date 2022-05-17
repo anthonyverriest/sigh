@@ -1,0 +1,49 @@
+fun main(args: String){
+    var array: Int[] = [0, 0, 0, 0]
+
+    var channelInt: ChanInt = make(ChanInt, 4) // create channel of type int with buffer size 4
+    var channelStr: ChanString = make(ChanString) // create channel of type string with buffer size 1
+
+    fun set(array: Int[], idx: Int, nb: Int){ //function that sets a value of array at index idx
+        array[idx] = nb
+    }
+
+    channelStr <- "GO" //send value to channel
+
+    var msg: String = <-channelStr //retrieve value from channel
+    print(msg)
+
+    routine set(array, 1, 4) //send function set as a routine to run async
+    routine set(array, 2, 5)
+
+    set(array, 0, 3)
+
+    channelInt <- array[0]
+
+    set(array, 3, 6)
+
+    channelInt <- array[3]
+    channelInt <- array[1]
+    channelInt <- array[2]
+
+    channelStr <- "END"
+
+    var i: Int = 0
+    while i <= 3 { //empty the channel
+        var output: Int = <-channelInt
+        print(output + "")
+
+        i = i + 1
+    }
+
+    msg = <-channelStr
+    print(msg)
+
+
+    print("Valid: 3 6 4 5")
+
+    close(channelInt) //close channels
+    close(channelStr)
+}
+
+main("")

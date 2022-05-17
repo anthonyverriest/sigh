@@ -1,0 +1,7 @@
+fun main (args: String) {
+    var initializedChannelOfTypeInt: ChanInt = make(ChanInt)
+    initializedChannelOfTypeInt <- 5 //send 5 to the channel
+    close(initializedChannelOfTypeInt) //channel will be emptied before being closed
+}
+
+main("")

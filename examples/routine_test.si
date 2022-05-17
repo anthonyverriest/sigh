@@ -1,0 +1,21 @@
+fun send(chan: ChanInt, msg: Int){
+    chan <- msg
+}
+
+fun main (args: String) {
+    var initializedChannelOfTypeInt: ChanInt = make(ChanInt)
+
+    //non-blocking calls
+    routine send(initializedChannelOfTypeInt, 5) //send first value (5)
+    routine send(initializedChannelOfTypeInt, 8) //send second value (8)
+
+    //blocking calls
+    var output: Int = <-initializedChannelOfTypeInt //receive first value
+    print(output + "") //5
+    output = <-initializedChannelOfTypeInt //receive second value
+    print(output + "") //8
+
+    close(initializedChannelOfTypeInt)
+}
+
+main("")

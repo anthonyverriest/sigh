@@ -18,7 +18,7 @@ public final class Test
 {
     public static void main (String[] args) {
 //         String file = "fizzbuzz.si";
-        String file = "vibe.si";
+        String file = "integration_test.si"; //vibe, integration_test, buffered_channel_test, send_test, receive_test, routine_test
         String path = Paths.get("examples/", file).toAbsolutePath().toString();
         String src = IO.slurp(path);
         SighGrammar grammar = new SighGrammar();

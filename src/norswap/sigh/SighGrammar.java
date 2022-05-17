@@ -208,7 +208,12 @@ public class SighGrammar extends Grammar
 
     public rule channel_expression = lazy(() -> choice(buffered_make_decl, channel_out_expr, or_expression));
 
-    public rule channel_value =  choice(string, floating, integer, reference);
+    public rule basic = choice(string, floating, integer, reference, array);
+
+    public rule channel_value = left_expression()
+        .left(basic)
+        .suffix(seq(LSQUARE, lazy(() -> this.expression), RSQUARE),
+            $ -> new ArrayAccessNode($.span(), $.$[0], $.$[1]));
 
     public rule channel_in_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelInStatementNode($.span(), $.$[0], $.$[1]));
 

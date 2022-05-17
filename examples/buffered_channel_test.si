@@ -1,0 +1,16 @@
+fun main(args: String){
+    var initializedChannelOfTypeInt: ChanInt = make(ChanInt, 2)
+
+    initializedChannelOfTypeInt <- 4
+    initializedChannelOfTypeInt <- 5
+
+    var output: Int = <-initializedChannelOfTypeInt
+    print(output + "")
+
+    output = <-initializedChannelOfTypeInt
+    print(output + "")
+
+    close(initializedChannelOfTypeInt)
+}
+
+main("")

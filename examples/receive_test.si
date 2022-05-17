@@ -1,0 +1,9 @@
+fun main (args: String) {
+    var initializedChannelOfTypeInt: ChanInt = make(ChanInt)
+    initializedChannelOfTypeInt <- 5 //send 5 to the channel
+    var output: Int = <-initializedChannelOfTypeInt //receive 5 from the channel and assign it to output
+    print(output + "") //5
+    close(initializedChannelOfTypeInt)
+}
+
+main("")
