@@ -385,6 +385,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanInt = make(ChanInt) ; x <- 4 ; close(x)");
         successInput("var x : ChanFloat = make(ChanFloat) ; x <- 9.0 ; close(x)");
 
+        successInput("var x: ChanInt = make(ChanInt) ; var z: Int = 4 ; x <- z ; close(x)");
+        successInput("var x: ChanInt = make(ChanInt) ; var z: Int[] = [4] ; x <- z[0] ; close(x)");
+
         //Edge cases
         failureInputWith("var x : ChanString = make(ChanString) ; x <- 4 ; close(x)",
             "invalid type passed to channel : ChanString <- Int");
@@ -405,6 +408,9 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
             "invalid type passed to channel : ChanInt <- String");
         failureInputWith("var x : ChanFloat = make(ChanFloat, 3) ; x <- \"hello\" ; close(x)",
             "invalid type passed to channel : ChanFloat <- String");
+
+        failureInputWith("var x : ChanFloat = make(ChanFloat) ; fun z(): Int { return 3 } ; x <- z ; close(x)",
+            "invalid type passed to channel : ChanFloat <- () -> Int");
     }
 
     // ---------------------------------------------------------------------------------------------
