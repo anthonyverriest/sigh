@@ -223,9 +223,13 @@ public final class InterpreterTests extends TestFixture {
         check("var x: Float = 1; x = 2; return x", 2.0d);
 
         /* VIBE */
-        check("var x : ChanString = make(ChanString); return x", new Channel<String>());
-        check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>());
-        check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>());
+        check("var x : ChanString = make(ChanString); return x", new Channel<String>(1));
+        check("var x : ChanInt = make(ChanInt); return x", new Channel<Integer>(1));
+        check("var x : ChanFloat = make(ChanFloat); return x", new Channel<Float>(1));
+
+        check("var x : ChanFloat = make(ChanFloat, 5); return x", new Channel<Float>(5));
+        check("var x : ChanInt = make(ChanInt, 5); return x", new Channel<Integer>(5));
+        check("var x : ChanString = make(ChanString, 5); return x", new Channel<String>(5));
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -359,24 +363,66 @@ public final class InterpreterTests extends TestFixture {
     // ---------------------------------------------------------------------------------------------
 
     @Test public void testClose(){
+        Channel<Integer> i = new Channel<>(1);
+        i.close();
+        check("var x: ChanInt = make(ChanInt) ;  close(x) ; return x", i);
+
+        Channel<Integer> z = new Channel<>(1);
+        z.send(3);
+        z.close();
+        check("var x: ChanInt = make(ChanInt) ; x <- 3 ;  close(x) ; return x", z);
+
         checkThrows("var x: ChanInt = make(ChanInt) ; close(x) ; var z: Int = 3 ; close(x)", BadChannelDescriptor.class);
         checkThrows("var x: ChanInt = null ; close(x)", BadChannelDescriptor.class);
     }
 
     @Test public void testSend(){
-        Channel<Integer> i = new Channel<>();
+        Channel<Integer> i = new Channel<>(1);
         i.send(4);
         check("var x : ChanInt = make(ChanInt) ; x <- 4 ; return x", i);
 
-        Channel<Float> f = new Channel<>();
+        Channel<Float> f = new Channel<>(1);
         f.send(10.0);
         check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; return x", f);
 
-        Channel<String> s = new Channel<>();
+        Channel<String> s = new Channel<>(1);
         s.send("hello");
         check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; return x", s);
 
         checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; x <- 4", BrokenChannel.class);
+
+
+        Channel<Integer> x = new Channel<>(3);
+        x.send(4);
+        x.send(2);
+        x.send(5);
+        check("var x : ChanInt = make(ChanInt, 3) ; x <- 4 ; x <- 2 ; x <- 5 ; return x", x);
+    }
+
+    @Test public void testReceive(){
+        check("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x ; return z == 4", true);
+
+        check("var x : ChanFloat = make(ChanFloat) ; x <- 10.0 ; var z: Float = <-x ; return z", 10.0);
+
+        Channel<String> s = new Channel<>(1);
+        s.send("hello");
+        check("var x : ChanString = make(ChanString) ; x <- \"hello\" ; var z: String = <-x ; return z", s.receive());
+
+        Channel<Integer> x = new Channel<>(3);
+        x.send(4);
+        x.send(2);
+        x.receive();
+        x.send(5);
+        check("var x : ChanInt = make(ChanInt, 3) ; x <- 4 ; x <- 2 ; var out: Int = <-x;  x <- 5 ; return x", x);
+
+        checkThrows("var x : ChanInt = make(ChanInt) ; close(x) ; var z: Int = <-x", BrokenChannel.class);
+    }
+
+    @Test public void testRoutine(){
+        // !!!!!!!!!!
+        // To run these tests you must comment the shutdown of the threadpool in the interpreter (interpret function)
+        // !!!!!!!!!!
+        //check("fun f(chan: ChanFloat): Void { chan <- 3.0 } ; var chan: ChanFloat = make(ChanFloat) ; routine f(chan) ; var out: Float = <-chan; return out ", 3.0);
     }
 
     // NOTE(norswap): Not incredibly complete, but should cover the basics.

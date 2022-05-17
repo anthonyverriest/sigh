@@ -56,6 +56,7 @@ public class SighGrammar extends Grammar
     public rule ARROW = word("<-");
     public rule _make = word("make");
     public rule _close= word("close");
+    public rule _routine = word("routine");
 
     public rule _var            = reserved("var");
     public rule _fun            = reserved("fun");
@@ -201,14 +202,18 @@ public class SighGrammar extends Grammar
     /* VIBE */
     public rule close_stmt = seq(_close, LPAREN, reference, RPAREN).push($ -> new ChannelCloseStatementNode($.span(), $.$[0]));
 
-    public rule make_decl = seq(_make, LPAREN, simple_type, RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0]));
+    public rule buffered_make_decl = seq(_make, LPAREN, simple_type, seq(COMMA, integer).or_push_null(), RPAREN).push($ -> new ChannelMakeExpressionNode($.span(), $.$[0], $.$[1]));
 
-    public rule channel_expression = lazy(() -> choice(make_decl, or_expression));
+    public rule channel_out_expr = seq(ARROW, reference).push($ -> new ChannelOutAssignmentNode($.span(), $.$[0]));
+    
+    public rule channel_expression = lazy(() -> choice(buffered_make_decl, channel_out_expr, or_expression));
 
     public rule channel_value =  choice(string, floating, integer, reference);
 
     public rule channel_in_stmt = seq(reference, ARROW, channel_value).push($ -> new ChannelInStatementNode($.span(), $.$[0], $.$[1]));
 
+
+    public rule routine_stmt = seq(_routine, reference, function_args).push($ -> new RoutineFunCallNode($.span(), new FunCallNode($.span(), $.$[0], $.$[1])));
 
 
 
@@ -223,7 +228,7 @@ public class SighGrammar extends Grammar
     public rule expression_stmt =
         expression
             .filter($ -> {
-                if (!($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode))
+                if (!(($.$[0] instanceof AssignmentNode || $.$[0] instanceof FunCallNode || $.$[0] instanceof ChannelOutAssignmentNode)))
                     return false;
                 $.push(new ExpressionStatementNode($.span(), $.$[0]));
                 return true;
@@ -234,6 +239,7 @@ public class SighGrammar extends Grammar
     public rule statement = lazy(() -> choice(
         this.block,
         this.close_stmt, // VIBE
+        this.routine_stmt,
         this.var_decl,
         this.fun_decl,
         this.struct_decl,

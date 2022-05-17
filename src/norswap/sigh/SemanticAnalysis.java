@@ -129,6 +129,9 @@ public final class SemanticAnalysis
         walker.register(ChannelMakeExpressionNode.class,           PRE_VISIT,  analysis::channelMake);
         walker.register(ChannelCloseStatementNode.class,           PRE_VISIT,  analysis::channelClose);
         walker.register(ChannelInStatementNode.class,           PRE_VISIT,  analysis::channelIn);
+        walker.register(ChannelOutAssignmentNode.class,           PRE_VISIT,  analysis::channelOut);
+
+        walker.register(RoutineFunCallNode.class,           PRE_VISIT,  analysis::routine);
 
         // types
         walker.register(SimpleTypeNode.class,           PRE_VISIT,  analysis::simpleType);
@@ -595,6 +598,38 @@ public final class SemanticAnalysis
     }
 
     /* VIBE */
+    private void routine(RoutineFunCallNode node){
+        R.rule(node, "type")
+            .using(node.function.function, "type")
+            .by(r -> {
+                Type type = r.get(0);
+
+                FunType funType = cast(type);
+
+                if (!(funType.returnType instanceof VoidType))
+                     r.error("routine only supports void functions", node);
+                else
+                    r.set(0, funType.returnType);
+            });
+    }
+
+    private void channelOut(ChannelOutAssignmentNode node){
+        R.rule(node, "type")
+            .using(node.channel, "type")
+            .by(r -> {
+                Type type = r.get(0);
+
+                if(type instanceof ChanStringType)
+                    r.set(0, StringType.INSTANCE);
+                else if(type instanceof ChanFloatType)
+                    r.set(0, FloatType.INSTANCE);
+                else if(type instanceof ChanIntType)
+                    r.set(0, IntType.INSTANCE);
+                else
+                    r.error("invalid type: " +  type, node);
+            });
+    }
+
     private void channelIn(ChannelInStatementNode node){
         R.rule(node, "value")
             .using(node.value.attr("type"), node.channel.attr("type"))
@@ -621,15 +656,24 @@ public final class SemanticAnalysis
     }
 
     private void channelMake(ChannelMakeExpressionNode node){
+
+        if (node.buffer.value < 1){
+            R.rule().by(r -> r.error("only positive integer in buffer", node));
+        }else{
+            R.set(node, "buffer", node.buffer.value);
+        }
+
         R.rule(node, "type")
             .using(node.type, "value")
             .by(r -> {
                 Type type = r.get(0);
+
                 if(!(type instanceof ChanIntType) && !(type instanceof ChanStringType) && !(type instanceof ChanFloatType))
                     r.error("invalid type passed to function make", node);
                 else
                     r.copyFirst();
             });
+
     }
 
     // endregion

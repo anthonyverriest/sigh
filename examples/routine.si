@@ -1,0 +1,17 @@
+fun main(args: String){
+    var x: Int[] = [3]
+
+    fun add(a: Int[], nb: Int){
+        a[0] = nb
+    }
+
+    add(x, 3)
+    routine add(x, 5)
+
+    print(x[0] + "")
+
+    add(x, 7)
+    print(x[0] + "")
+}
+
+main("")

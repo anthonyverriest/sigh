@@ -7,9 +7,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class Channel<T> {
     private ArrayBlockingQueue<T> queue;
     private boolean isOpen;
+    private final int buffer;
 
-    public Channel(){
-        this.queue = new ArrayBlockingQueue<>(1);
+    public Channel(int buffer){
+        this.buffer = buffer;
+        this.queue = new ArrayBlockingQueue<>(buffer);
         this.isOpen = true;
     }
 
@@ -28,6 +30,17 @@ public class Channel<T> {
         }
     }
 
+    public T receive(){
+        if(isOpen()){
+            try{
+                return this.queue.take();
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+        throw new BrokenChannel();
+    }
+
     public boolean isOpen(){
         return isOpen;
     }
@@ -35,7 +48,6 @@ public class Channel<T> {
     public void close() throws BadChannelDescriptor {
         if(!isOpen())
             throw  new BadChannelDescriptor();
-        queue.clear();
         queue = null;
         isOpen = false;
     }
@@ -50,6 +62,6 @@ public class Channel<T> {
 
     @Override
     public int hashCode () {
-        return Objects.hash(Arrays.hashCode(queue.toArray()), isOpen);
+        return (queue == null) ? Objects.hash(isOpen, buffer) : Objects.hash(Arrays.hashCode(queue.toArray()), isOpen, buffer);
     }
 }

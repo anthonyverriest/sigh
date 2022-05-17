@@ -1,9 +1,11 @@
 package norswap.sigh.interpreter;
 
+import norswap.sigh.SemanticAnalysis;
 import norswap.sigh.ast.*;
 import norswap.sigh.interpreter.channel.BadChannelDescriptor;
 import norswap.sigh.interpreter.channel.BrokenChannel;
 import norswap.sigh.interpreter.channel.Channel;
+import norswap.sigh.interpreter.channel.Routine;
 import norswap.sigh.scopes.DeclarationKind;
 import norswap.sigh.scopes.RootScope;
 import norswap.sigh.scopes.Scope;
@@ -14,6 +16,7 @@ import norswap.utils.Util;
 import norswap.utils.exceptions.Exceptions;
 import norswap.utils.exceptions.NoStackException;
 import norswap.utils.visitors.ValuedVisitor;
+import norswap.utils.visitors.Walker;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,9 +94,35 @@ public final class Interpreter
         visitor.register(ChannelMakeExpressionNode.class , this::buildInMake);
         visitor.register(ChannelCloseStatementNode.class , this::buildInClose);
         visitor.register(ChannelInStatementNode.class , this::channelIn);
+        visitor.register(ChannelOutAssignmentNode.class , this::channelOut);
+
+        visitor.register(RoutineFunCallNode.class , this::routine);
 
 
         visitor.registerFallback(node -> null);
+    }
+
+    public void setStorage (ScopeStorage storage) {
+        this.storage = storage;
+    }
+
+    public void setRootScope (RootScope rootScope) {
+        this.rootScope = rootScope;
+    }
+
+    public void setRootStorage (ScopeStorage rootStorage) {
+        this.rootStorage = rootStorage;
+    }
+
+    protected Interpreter clone ()  {
+        Interpreter i = new Interpreter(this.reactor);
+        if (this.storage != null)
+            i.setStorage(this.storage);
+        if (this.rootScope != null)
+            i.setRootScope(this.rootScope);
+        if (this.rootStorage != null)
+            i.setRootStorage(this.rootStorage);
+        return i;
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -103,6 +132,9 @@ public final class Interpreter
             return run(root);
         } catch (PassthroughException e) {
             throw Exceptions.runtime(e.getCause());
+        } finally {
+            Routine.shutdown();
+            storage = null;
         }
     }
 
@@ -132,7 +164,7 @@ public final class Interpreter
 
     // ---------------------------------------------------------------------------------------------
 
-    private <T> T get(SighNode node) {
+    private  <T> T get(SighNode node) {
         return cast(run(node));
     }
 
@@ -356,8 +388,6 @@ public final class Interpreter
         } catch (Return r) {
             return r.value;
             // allow returning from the main script
-        } finally {
-            storage = null;
         }
         return null;
     }
@@ -416,14 +446,13 @@ public final class Interpreter
         if (decl instanceof Constructor)
             return buildStruct(((Constructor) decl).declaration, args);
 
-
         ScopeStorage oldStorage = storage;
         Scope scope = reactor.get(decl, "scope");
         storage = new ScopeStorage(scope, storage);
 
         FunDeclarationNode funDecl = (FunDeclarationNode) decl;
         coIterate(args, funDecl.parameters,
-                (arg, param) -> storage.set(scope, param.name, arg));
+            (arg, param) -> storage.set(scope, param.name, arg));
 
         try {
             get(funDecl.block);
@@ -436,6 +465,38 @@ public final class Interpreter
     }
 
     /* VIBE */
+    private Void routine(RoutineFunCallNode node){
+        Interpreter new_interpreter = this.clone();
+
+        Object decl = new_interpreter.get(node.function.function);
+        node.function.arguments.forEach(new_interpreter::run);
+        Object[] args = map(node.function.arguments, new Object[0], visitor);
+
+        if (decl == Null.INSTANCE)
+            throw new PassthroughException(new NullPointerException("calling a null function"));
+
+        //ScopeStorage oldStorage = new_interpreter.storage;
+        Scope scope = reactor.get(decl, "scope");
+        new_interpreter.storage = new ScopeStorage(scope, new_interpreter.storage);
+
+        FunDeclarationNode funDecl = (FunDeclarationNode) decl;
+        coIterate(args, funDecl.parameters,
+            (arg, param) -> new_interpreter.storage.set(scope, param.name, arg));
+
+        Routine.routine(() -> new_interpreter.get(funDecl.block));
+
+        return null;
+    }
+
+    private Object channelOut(ChannelOutAssignmentNode node){
+        Object channel = visitor.apply(node.channel);
+        try {
+            return ((Channel<?>) channel).receive();
+        } catch (BrokenChannel | NullPointerException | ClassCastException e) {
+            throw new PassthroughException(new BrokenChannel());
+        }
+    }
+
     private Void channelIn(ChannelInStatementNode node){
         Object channel = visitor.apply(node.channel);
         Object value = visitor.apply(node.value);
@@ -459,15 +520,16 @@ public final class Interpreter
 
     private Object buildInMake (ChannelMakeExpressionNode node) {
         Object decl = reactor.get(node, "type");
+        int buffer = ((Long)reactor.get(node, "buffer")).intValue();
 
         if (decl instanceof ChanStringType){
-            return new Channel<String>();
+            return new Channel<String>(buffer);
         }
         if (decl instanceof ChanFloatType){
-            return new Channel<Float>();
+            return new Channel<Float>(buffer);
         }
         if (decl instanceof ChanIntType){
-            return new Channel<Integer>();
+            return new Channel<Integer>(buffer);
         }
 
         return null;

@@ -27,9 +27,6 @@ public class GrammarTests extends AutumnTestFixture {
         return new StringLiteralNode(null, s);
     }
 
-    /* VIBE */
-
-
     // ---------------------------------------------------------------------------------------------
 
     @Test
@@ -117,7 +114,14 @@ public class GrammarTests extends AutumnTestFixture {
                 new BlockNode(null, asList(new ReturnNode(null, intlit(1))))));
 
         /* VIBE */
-        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"))));
+        successExpect("var x: ChanInt = make(ChanInt)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), new IntLiteralNode(null, 1))));
+        successExpect("var x: ChanFloat = make(ChanFloat)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanFloat"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanFloat"), new IntLiteralNode(null, 1))));
+        successExpect("var x: ChanString = make(ChanString)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanString"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanString"), new IntLiteralNode(null, 1))));
+
+        successExpect("var x: ChanInt = make(ChanInt, 3)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanInt"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanInt"), new IntLiteralNode(null, 3))));
+        successExpect("var x: ChanFloat = make(ChanFloat, 3)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanFloat"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanFloat"), new IntLiteralNode(null, 3))));
+        successExpect("var x: ChanString = make(ChanString, 3)", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "ChanString"), new ChannelMakeExpressionNode(null, new SimpleTypeNode(null, "ChanString"), new IntLiteralNode(null, 3))));
+
 
         failure("var x: ChanInt = make(ChanInt) + 3");
         failure("var x : ChanInt[] = make(chanInt[])");
@@ -168,4 +172,27 @@ public class GrammarTests extends AutumnTestFixture {
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    @Test public void testReceive(){
+        /* VIBE */
+        rule = grammar.statement;
+
+        successExpect("var x: Int = <-fizz", new VarDeclarationNode(null, "x", new SimpleTypeNode(null, "Int"), new ChannelOutAssignmentNode(null, new ReferenceNode(null, "fizz"))));
+        successExpect("x = <-fizz", new ExpressionStatementNode(null, new AssignmentNode(null, new ReferenceNode(null, "x"), new ChannelOutAssignmentNode(null, new ReferenceNode(null, "fizz")))));
+
+        failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = 5 + <-x ; close(x)");
+        failure("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: Int = <-x - 9 ; close(x)");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test public void testRoutine(){
+        /* VIBE */
+        rule = grammar.statement;
+
+        successExpect("routine f(1)", new RoutineFunCallNode(null, new FunCallNode(null, new ReferenceNode(null, "f"), asList(intlit(1)))));
+
+        failure("var x: Int = routine f(1)");
+        failure("routine f");
+    }
 }
