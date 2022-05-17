@@ -311,6 +311,10 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
     @Test public void testMake()
     {
         /* VIBE */
+        successInput("var x : ChanInt = null ; x = make(ChanInt)");
+        successInput("var x : ChanString = null ; x = make(ChanString)");
+        successInput("var x : ChanFloat = null ; x = make(ChanFloat)");
+
         successInput("var x : ChanInt = make(ChanInt)");
         successInput("var x : ChanString = make(ChanString)");
         successInput("var x : ChanFloat = make(ChanFloat)");
@@ -319,11 +323,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanString = make(ChanString, 1)");
         successInput("var x : ChanFloat = make(ChanFloat, 5)");
 
-        failureInput("var x : ChanString = make(ChanString, \"hello\")");
-        failureInput("var x : ChanFloat = make(ChanFloat, null)");
-        failureInput("var x : ChanFloat = make(ChanFloat, 5.0)");
-
         // Edge cases
+        failureInputWith("var x : ChanString = make(ChanString, \"hello\")", "Could not resolve: make");
+        failureInputWith("var x : ChanFloat = make(ChanFloat, null)", "Could not resolve: make");
+        failureInputWith("var x : ChanFloat = make(ChanFloat, 5.0)", "Could not resolve: make");
+
         failureInputWith("var x : ChanInt = make(ChanInt, -1)", "only positive integer in buffer");
         failureInputWith("var x : ChanInt = make(ChanInt, 0)", "only positive integer in buffer");
 
@@ -362,11 +366,11 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat) ; close(x)");
 
         // Edge cases
-        failureInput("close(8.0)");
-        failureInput("close(null)");
-        failureInput("close(3)");
-        failureInput("close(\"h\")");
+        failureInputWith("close(8.0)", "Could not resolve: close");
+        failureInputWith("close(3)", "Could not resolve: close");
+        failureInputWith("close(\"h\")", "Could not resolve: close");
 
+        failureInputWith("close(null)", "invalid type passed to function close");
         failureInputWith("var x : Int = 3 ; close(x)",
             "invalid type passed to function close");
         failureInputWith("var x : Float = 3.0 ; close(x)",
@@ -381,8 +385,26 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanInt = make(ChanInt) ; x <- 4 ; close(x)");
         successInput("var x : ChanFloat = make(ChanFloat) ; x <- 9.0 ; close(x)");
 
+        //Edge cases
         failureInputWith("var x : ChanString = make(ChanString) ; x <- 4 ; close(x)",
             "invalid type passed to channel : ChanString <- Int");
+        failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4.0 ; close(x)",
+            "invalid type passed to channel : ChanInt <- Float");
+        failureInputWith("var x : ChanFloat = make(ChanFloat) ; x <- 4 ; close(x)",
+            "invalid type passed to channel : ChanFloat <- Int");
+
+        failureInputWith("var x : ChanFloat = make(ChanFloat) ; var z: Int = 4 ; x <- z ; close(x)",
+            "invalid type passed to channel : ChanFloat <- Int");
+
+        failureInputWith("var x : ChanFloat = make(ChanFloat) ; var z: ChanInt = make(ChanInt) ; x <- z ; close(x)",
+            "invalid type passed to channel : ChanFloat <- ChanInt");
+
+        failureInputWith("var x : ChanString = make(ChanString, 2) ; x <- 4.0 ; close(x)",
+            "invalid type passed to channel : ChanString <- Float");
+        failureInputWith("var x : ChanInt = make(ChanInt, 5) ; x <- \"hello\" ; close(x)",
+            "invalid type passed to channel : ChanInt <- String");
+        failureInputWith("var x : ChanFloat = make(ChanFloat, 3) ; x <- \"hello\" ; close(x)",
+            "invalid type passed to channel : ChanFloat <- String");
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -393,7 +415,10 @@ public final class SemanticAnalysisTests extends UraniumTestFixture
         successInput("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: Float = <-x ; close(x)");
         successInput("var x : ChanString = make(ChanString) ; x <- \"h\" ; var z: String = <-x ; close(x)");
 
+        //Edge cases
         failureInputWith("var x : ChanInt = make(ChanInt) ; var z: Int = 5 ; x <- 4 ; var w: Int = <-z ; close(x)", "invalid type: Int");
+        failureInputWith("var x : ChanInt = make(ChanInt) ; var z: String = \"hello\" ; x <- 4 ; var w: String = <-z ; close(x)", "invalid type: String");
+        failureInputWith("var x : ChanInt = make(ChanInt) ; var z: Float = 5.0 ; x <- 4 ; var w: Float = <-z ; close(x)", "invalid type: Float");
 
         failureInputWith("var x : ChanInt = make(ChanInt) ; x <- 4 ; var z: String = <-x ; close(x)", "expected String but got Int");
         failureInputWith("var x : ChanFloat = make(ChanFloat) ; x <- 4.0 ; var z: String = <-x ; close(x)", "expected String but got Float");
